@@ -89,6 +89,7 @@
               trained <strong class="text-gray-500">45–60</strong>,
               elite <strong class="text-gray-500">60–80+</strong>.
             </p>
+            <p id="vo2-pace-hint" class="text-xs text-orange-400/70 mt-1 leading-relaxed hidden"></p>
           </div>
         </div>
       </div>
@@ -381,7 +382,8 @@ function setSport(s) {
   document.getElementById('btn-running').className = s === 'running'  ? active : idle;
   document.getElementById('kit-label').textContent = s === 'cycling' ? 'Bike + Kit Weight (kg)' : 'Running Kit Weight (kg)';
   document.getElementById('kit-weight').value = s === 'cycling' ? '8' : '0.5';
-  document.getElementById('target-speed').value = s === 'cycling' ? '30' : '12';
+  document.getElementById('target-speed').value = s === 'cycling' ? '30' : '9';
+  updateVo2PaceHint();
   if (rawIntervals) recalculate();
 }
 
@@ -466,7 +468,25 @@ async function processData() {
 // PARAM CHANGE HANDLER
 // ════════════════════════════════════════════════════════════════
 function onParamChange() {
+  updateVo2PaceHint();
   if (rawIntervals) recalculate();
+}
+
+function updateVo2PaceHint() {
+  const hintEl = document.getElementById('vo2-pace-hint');
+  if (!hintEl) return;
+  const vo2 = parseFloat(document.getElementById('vo2max').value) || 0;
+  if (vo2 <= 0) { hintEl.classList.add('hidden'); return; }
+  if (sport === 'running') {
+    // ratio = v_m/s × 12.74 / vo2  →  boundary speeds in km/h
+    const v75  = (vo2 * 0.75 / 12.74 * 3.6).toFixed(1);
+    const v95  = (vo2 * 0.95 / 12.74 * 3.6).toFixed(1);
+    const vVO2 = (vo2        / 12.74 * 3.6).toFixed(1);
+    hintEl.textContent = `Flat-terrain zones at this VO₂max — green ≤ ${v75} km/h · yellow ${v75}–${v95} km/h · red > ${v95} km/h (VO₂max pace ≈ ${vVO2} km/h)`;
+    hintEl.classList.remove('hidden');
+  } else {
+    hintEl.classList.add('hidden');
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -565,9 +585,9 @@ function applyPhysics(intervals, p) {
   const hrs = distTotal / 1000 / p.speedKmh;
   const carbsTotal = p.carbs * hrs;
 
-  // Aerobic ceiling: W_max = ((VO2Max × BodyWeight) / 1000) × 20.1 × Efficiency
+  // Aerobic ceiling: W_max = (VO2Max [ml/kg/min] × BW [kg] × 20.1 [J/ml O₂] × eff) / 60 [s/min] → Watts
   baseWMax = p.vo2max > 0
-    ? ((p.vo2max * p.bodyWeight) / 1000) * 20.1 * p.eff
+    ? (p.vo2max * p.bodyWeight * 20.1 * p.eff) / 60
     : 0;
 
   let kcalCum = 0, carbsCum = 0;
