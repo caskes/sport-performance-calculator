@@ -113,12 +113,14 @@
             <input type="number" id="target-speed" value="30" min="5" max="120" step="0.5"
               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
               oninput="onParamChange()">
+            <p id="speed-derived-time" class="text-xs text-gray-500 mt-1 hidden"></p>
           </div>
           <div id="time-wrap" class="hidden">
             <label class="text-xs text-gray-500 block mb-1">Target Time (HH:MM)</label>
             <input type="text" id="target-time" placeholder="04:30"
               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm font-mono focus:border-orange-500 focus:outline-none transition-colors"
               oninput="onParamChange()">
+            <p id="time-derived-speed" class="text-xs text-gray-500 mt-1 hidden"></p>
           </div>
         </div>
       </div>
@@ -394,6 +396,7 @@ function toggleTargetInput() {
   const useSpeed = document.querySelector('input[name="target-type"][value="speed"]').checked;
   document.getElementById('speed-wrap').classList.toggle('hidden', !useSpeed);
   document.getElementById('time-wrap').classList.toggle('hidden', useSpeed);
+  updateTargetIndication();
   if (rawIntervals) recalculate();
 }
 
@@ -469,7 +472,41 @@ async function processData() {
 // ════════════════════════════════════════════════════════════════
 function onParamChange() {
   updateVo2PaceHint();
+  updateTargetIndication();
   if (rawIntervals) recalculate();
+}
+
+function updateTargetIndication() {
+  const distKm = totalDistM / 1000;
+  const timeEl  = document.getElementById('speed-derived-time');
+  const speedEl = document.getElementById('time-derived-speed');
+
+  // Speed mode → show derived total time
+  if (timeEl) {
+    const spd = parseFloat(document.getElementById('target-speed').value);
+    if (distKm > 0 && spd > 0) {
+      const hrs = distKm / spd;
+      const hh  = Math.floor(hrs);
+      const mm  = Math.round((hrs - hh) * 60);
+      timeEl.textContent = `→ Total time: ${hh}h ${String(mm).padStart(2, '0')}m`;
+      timeEl.classList.remove('hidden');
+    } else {
+      timeEl.classList.add('hidden');
+    }
+  }
+
+  // Time mode → show derived average speed
+  if (speedEl) {
+    const t = document.getElementById('target-time').value;
+    const [hh, mm] = t.split(':').map(Number);
+    const hrs = (hh || 0) + (mm || 0) / 60;
+    if (distKm > 0 && hrs > 0) {
+      speedEl.textContent = `→ Avg speed: ${(distKm / hrs).toFixed(1)} km/h`;
+      speedEl.classList.remove('hidden');
+    } else {
+      speedEl.classList.add('hidden');
+    }
+  }
 }
 
 function updateVo2PaceHint() {
@@ -502,6 +539,7 @@ function recalculate() {
   totalDistM = rawIntervals[rawIntervals.length - 1]?.d ?? 0;
   totalHours = totalDistM / 1000 / p.speedKmh;
 
+  updateTargetIndication();
   updateSummary(p);
   updateFuel();
   renderChart(computed);
