@@ -23,7 +23,7 @@
   <div class="max-w-7xl mx-auto px-5 py-3 flex items-center justify-between">
     <div>
       <h1 class="text-base font-bold text-white tracking-tight">⚡ Sport Performance Calculator</h1>
-      <p class="text-xs text-gray-500">Bio-Mechanical &amp; Nutritional GPX Processor</p>
+      <p class="text-xs text-gray-500">Physiological Intelligence Engine</p>
     </div>
     <div class="flex bg-gray-800 rounded-lg p-1 gap-1">
       <button id="btn-cycling" onclick="setSport('cycling')"
@@ -77,6 +77,18 @@
             <input type="number" id="kit-weight" value="8" min="0" max="30" step="0.5"
               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
               oninput="onParamChange()">
+          </div>
+          <div class="border-t border-gray-800 pt-3">
+            <label class="text-xs text-gray-500 block mb-1">VO₂ Max (mL/kg/min)</label>
+            <input type="number" id="vo2max" placeholder="e.g. 52" min="20" max="100" step="1"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
+              oninput="onParamChange()">
+            <p class="text-xs text-gray-700 mt-1.5 leading-relaxed">
+              From Apple Health or a lab test. Enables intensity zone heatmap &amp; aerobic ceiling (W<sub>max</sub>).
+              Typical values: recreational <strong class="text-gray-500">35–45</strong>,
+              trained <strong class="text-gray-500">45–60</strong>,
+              elite <strong class="text-gray-500">60–80+</strong>.
+            </p>
           </div>
         </div>
       </div>
@@ -145,6 +157,24 @@
               <strong class="text-gray-500">120 g/hr</strong> using mixed carb sources.
             </p>
           </div>
+          <div class="border-t border-gray-800 pt-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="text-xs text-gray-400 font-medium">Altitude Hypoxia Modeling</p>
+                <p class="text-xs text-gray-600 mt-1 leading-relaxed">
+                  Applies a ~1 % aerobic power loss per 100 m above 1500 m, plus a 5 % metabolic cost
+                  penalty above 1800 m (respiratory stress). Critical for Alpine events like Livigno or
+                  high-altitude marathon courses. Requires VO₂ Max to be set.
+                </p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer mt-0.5 shrink-0">
+                <input type="checkbox" id="hypoxia-toggle" class="sr-only peer" onchange="onParamChange()">
+                <div class="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:bg-orange-500
+                  after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white
+                  after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4"></div>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -207,14 +237,7 @@
       <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Elevation &amp; Power Profile</h2>
-          <div id="chart-legend" class="hidden flex gap-4">
-            <span class="flex items-center gap-1.5 text-xs text-sky-400">
-              <span class="inline-block w-3 h-3 rounded-sm" style="background:rgba(56,189,248,0.4)"></span>Elevation
-            </span>
-            <span class="flex items-center gap-1.5 text-xs text-orange-400">
-              <span class="inline-block w-4 h-0.5 bg-orange-400 rounded"></span>Power
-            </span>
-          </div>
+          <div id="chart-legend" class="hidden flex flex-wrap gap-3 items-center"></div>
         </div>
         <div id="chart-placeholder" class="flex flex-col items-center justify-center py-16 text-gray-700">
           <div class="text-5xl mb-3 opacity-40">📈</div>
@@ -254,6 +277,23 @@
           </div>
         </div>
 
+        <!-- Red Zone Vulnerability Bar -->
+        <div id="redzone-bar" class="hidden bg-red-950/30 border border-red-900/40 rounded-xl p-3 mb-3">
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="text-xl shrink-0">🔴</span>
+              <div>
+                <p class="text-xs font-semibold text-red-400">Critical Fatigue Zone</p>
+                <p class="text-xs text-gray-600 mt-0.5">Distance where required power exceeds aerobic ceiling (&gt; 95 % W<sub>max</sub>)</p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <p id="s-redzone-dist" class="text-xl font-bold text-red-400">—</p>
+              <p id="s-redzone-pct" class="text-xs text-gray-600">—</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Fuel Plan -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
           <div class="flex items-center justify-between mb-3">
@@ -278,6 +318,11 @@
               <p id="f-iso" class="text-xl font-bold text-white">—</p>
             </div>
           </div>
+          <!-- Zone advisory: shown when >15 % of route is anaerobic -->
+          <div id="zone-advisory" class="hidden bg-amber-950/30 border border-amber-900/40 rounded-lg p-3 mt-3 text-xs leading-relaxed">
+            <p class="text-amber-300 font-semibold mb-0.5">⚡ Red Zone Advisory</p>
+            <p id="zone-advisory-text" class="text-gray-500"></p>
+          </div>
         </div>
       </div>
 
@@ -299,7 +344,8 @@
                 <th class="text-right py-2 pr-3 font-medium">Gradient</th>
                 <th class="text-right py-2 pr-3 font-medium">Power</th>
                 <th class="text-right py-2 pr-3 font-medium">kcal (cum)</th>
-                <th class="text-right py-2 font-medium">Carbs (cum)</th>
+                <th class="text-right py-2 pr-3 font-medium">Carbs (cum)</th>
+                <th class="text-right py-2 font-medium">Zone</th>
               </tr>
             </thead>
             <tbody id="table-body" class="divide-y divide-gray-800/50"></tbody>
@@ -318,9 +364,11 @@
 // ════════════════════════════════════════════════════════════════
 let sport = 'cycling';
 let rawIntervals = null;   // [{d, e}] from server
-let computed = null;       // [{d, e, g, w, k, c}] after client physics
+let computed = null;       // [{d,e,g,w,k,c,z,r,wm}] after physics
 let totalDistM = 0;
 let totalHours = 0;
+let baseWMax = 0;          // aerobic ceiling W (from VO2Max); 0 = not set
+let redDistFraction = 0;   // fraction of route in the red (anaerobic) zone
 
 // ════════════════════════════════════════════════════════════════
 // SPORT TOGGLE
@@ -441,11 +489,13 @@ function recalculate() {
 }
 
 function getParams() {
-  const body  = parseFloat(document.getElementById('body-weight').value) || 75;
-  const kit   = parseFloat(document.getElementById('kit-weight').value)  || 0;
-  const eff   = parseInt(document.getElementById('efficiency').value)    / 100;
-  const carbs = parseInt(document.getElementById('hourly-carbs').value);
-  const win   = parseInt(document.getElementById('smoothing').value);
+  const body   = parseFloat(document.getElementById('body-weight').value) || 75;
+  const kit    = parseFloat(document.getElementById('kit-weight').value)  || 0;
+  const eff    = parseInt(document.getElementById('efficiency').value)    / 100;
+  const carbs  = parseInt(document.getElementById('hourly-carbs').value);
+  const win    = parseInt(document.getElementById('smoothing').value);
+  const vo2max  = parseFloat(document.getElementById('vo2max').value)    || 0;
+  const hypoxia = document.getElementById('hypoxia-toggle').checked;
 
   let speedKmh;
   if (document.querySelector('input[name="target-type"][value="speed"]').checked) {
@@ -458,7 +508,7 @@ function getParams() {
     speedKmh  = hrs > 0 && km > 0 ? km / hrs : 30;
   }
 
-  return { mass: body + kit, eff, carbs, smoothing: win, speedKmh };
+  return { mass: body + kit, bodyWeight: body, eff, carbs, smoothing: win, speedKmh, vo2max, hypoxia };
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -488,6 +538,23 @@ function movingAvg(arr, win) {
 }
 
 // ════════════════════════════════════════════════════════════════
+// HYPOXIA MODEL  (per specification)
+// ════════════════════════════════════════════════════════════════
+function applyAltitudeHypoxia(wmaxBase, elevationMeters) {
+  let adjustedWMax = wmaxBase;
+  let metabolicMultiplier = 1.0;
+  if (elevationMeters > 1500) {
+    const metersAboveThreshold = elevationMeters - 1500;
+    const penaltyPercentage = (metersAboveThreshold / 100) * 0.01;
+    adjustedWMax = wmaxBase * (1 - penaltyPercentage);
+    if (elevationMeters > 1800) {
+      metabolicMultiplier = 1.05;
+    }
+  }
+  return { adjustedWMax, metabolicMultiplier };
+}
+
+// ════════════════════════════════════════════════════════════════
 // PHYSICS ENGINE  (100 m interval model)
 // ════════════════════════════════════════════════════════════════
 function applyPhysics(intervals, p) {
@@ -498,11 +565,25 @@ function applyPhysics(intervals, p) {
   const hrs = distTotal / 1000 / p.speedKmh;
   const carbsTotal = p.carbs * hrs;
 
+  // Aerobic ceiling: W_max = ((VO2Max × BodyWeight) / 1000) × 20.1 × Efficiency
+  baseWMax = p.vo2max > 0
+    ? ((p.vo2max * p.bodyWeight) / 1000) * 20.1 * p.eff
+    : 0;
+
   let kcalCum = 0, carbsCum = 0;
 
   return intervals.map((iv, i) => {
     const slope  = iv.g;  // dimensionless rise/run
     const segLen = i < intervals.length - 1 ? intervals[i + 1].d - iv.d : 100;
+
+    // Altitude-adjusted ceiling & metabolic cost for this segment
+    let adjWMax = baseWMax;
+    let metMult = 1.0;
+    if (p.hypoxia && baseWMax > 0) {
+      const hyp = applyAltitudeHypoxia(baseWMax, iv.e);
+      adjWMax = hyp.adjustedWMax;
+      metMult = hyp.metabolicMultiplier;
+    }
 
     let watts = 0, kcalSeg = 0;
 
@@ -512,27 +593,51 @@ function applyPhysics(intervals, p) {
       const pAero = 0.5 * 1.15 * 0.35 * v * v * v;
       watts = Math.max(0, (pGrav + pRoll + pAero) / 0.97);
       const timeSeg = v > 0 ? segLen / v : 0;
-      kcalSeg = (watts * timeSeg / 1000) / 4.184 / p.eff;
+      // metabolicMultiplier applied to kcal (respiratory cost at altitude)
+      kcalSeg = (watts * timeSeg / 1000) / 4.184 / p.eff * metMult;
     } else {
-      // Running: E = m × dist_km × Cr  (Cr ≈ 1.02 kcal/kg/km)
-      kcalSeg = m * (segLen / 1000) * 1.02;
+      // Running base energy; keep mechanical watts independent of metMult
+      const baseKcal = m * (segLen / 1000) * 1.02;
+      kcalSeg = baseKcal * metMult;
       const timeSeg = v > 0 ? segLen / v : 0;
-      watts = timeSeg > 0 ? (kcalSeg * 4184 * p.eff) / timeSeg : 0;
+      watts = timeSeg > 0 ? (baseKcal * 4184 * p.eff) / timeSeg : 0;
     }
 
-    kcalCum  += kcalSeg;
+    kcalCum += kcalSeg;
     const carbsSeg = distTotal > 0 ? carbsTotal * (segLen / distTotal) : 0;
     carbsCum += carbsSeg;
 
+    // Intensity zone: ratio of required watts to altitude-adjusted ceiling
+    const ratio = adjWMax > 0 ? watts / adjWMax : 0;
+    const zone  = ratio > 0.95 ? 'red' : ratio >= 0.75 ? 'yellow' : 'green';
+
     return {
-      d: iv.d,
-      e: iv.e,
-      g: iv.g * 100,  // as % for display
-      w: Math.round(watts * 10) / 10,
-      k: Math.round(kcalCum * 10) / 10,
-      c: Math.round(carbsCum * 10) / 10,
+      d:  iv.d,
+      e:  iv.e,
+      g:  iv.g * 100,              // gradient %
+      w:  Math.round(watts * 10) / 10,
+      k:  Math.round(kcalCum * 10) / 10,
+      c:  Math.round(carbsCum * 10) / 10,
+      z:  zone,                    // intensity zone
+      r:  Math.round(ratio * 1000) / 1000,  // intensity ratio
+      wm: Math.round(adjWMax),     // altitude-adjusted W_max at this segment
     };
   });
+}
+
+// ════════════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════════════
+function fmtDur(s) {
+  if (s < 60) return '~' + Math.round(s) + ' s';
+  const m = Math.floor(s / 60), sec = Math.round(s % 60);
+  return '~' + m + 'm' + (sec > 0 ? ' ' + sec + 's' : '');
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = '⚠ ' + msg;
+  el.classList.remove('hidden');
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -550,40 +655,48 @@ function updateSummary(p) {
   }, 0);
   const avgW = computed.reduce((s, r) => s + r.w, 0) / (computed.length || 1);
 
-  // Max power: find the interval with the highest wattage
+  // Max power + sustained duration at ≥ 90 % of peak
   const maxRow = computed.reduce((best, r) => r.w > best.w ? r : best, computed[0]);
   const maxW   = maxRow?.w ?? 0;
-  const maxG   = maxRow?.g ?? 0;  // gradient % at that segment
-
-  // Sustained duration: longest consecutive run of segments at ≥ 90% of peak watts
-  const threshold = maxW * 0.9;
-  const vMs = p.speedKmh / 3.6;
+  const maxG   = maxRow?.g ?? 0;
+  const vMs    = p.speedKmh / 3.6;
+  const thr    = maxW * 0.9;
   let bestDurS = 0, curDurS = 0;
   for (let i = 0; i < computed.length; i++) {
-    const segLen = i < computed.length - 1 ? computed[i + 1].d - computed[i].d : 100;
-    if (computed[i].w >= threshold) {
-      curDurS += vMs > 0 ? segLen / vMs : 0;
-    } else {
-      if (curDurS > bestDurS) bestDurS = curDurS;
-      curDurS = 0;
-    }
+    const sl = i < computed.length - 1 ? computed[i + 1].d - computed[i].d : 100;
+    if (computed[i].w >= thr) { curDurS += vMs > 0 ? sl / vMs : 0; }
+    else { if (curDurS > bestDurS) bestDurS = curDurS; curDurS = 0; }
   }
   if (curDurS > bestDurS) bestDurS = curDurS;
 
-  function fmtDur(s) {
-    if (s < 60) return '~' + Math.round(s) + ' s';
-    const m = Math.floor(s / 60), sec = Math.round(s % 60);
-    return '~' + m + 'm' + (sec > 0 ? ' ' + sec + 's' : '');
+  // Red zone distance (only meaningful when baseWMax is set)
+  let redDistM = 0;
+  for (let i = 0; i < computed.length; i++) {
+    if (computed[i].z === 'red') {
+      redDistM += (i < computed.length - 1 ? computed[i + 1].d - computed[i].d : 100);
+    }
   }
+  redDistFraction = totalDistM > 0 ? redDistM / totalDistM : 0;
 
   document.getElementById('s-distance').textContent      = distKm.toFixed(1) + ' km';
-  document.getElementById('s-time').textContent          = hh + 'h ' + String(mm).padStart(2,'0') + 'm';
+  document.getElementById('s-time').textContent          = hh + 'h ' + String(mm).padStart(2, '0') + 'm';
   document.getElementById('s-elevation').textContent     = Math.round(elevGain) + ' m';
   document.getElementById('s-kcal').textContent          = Math.round(last?.k ?? 0) + ' kcal';
   document.getElementById('s-power').textContent         = Math.round(avgW) + ' W';
   document.getElementById('s-maxpower').textContent      = Math.round(maxW) + ' W';
   document.getElementById('s-maxpower-grad').textContent = 'at ' + maxG.toFixed(1) + '% grade';
   document.getElementById('s-maxpower-dur').textContent  = 'sustained ' + fmtDur(bestDurS);
+
+  // Red Zone vulnerability bar
+  const rzBar = document.getElementById('redzone-bar');
+  if (baseWMax > 0) {
+    rzBar.classList.remove('hidden');
+    document.getElementById('s-redzone-dist').textContent = (redDistM / 1000).toFixed(1) + ' km';
+    document.getElementById('s-redzone-pct').textContent  = Math.round(redDistFraction * 100) + '% of route';
+  } else {
+    rzBar.classList.add('hidden');
+  }
+
   document.getElementById('summary-section').classList.remove('hidden');
 }
 
@@ -591,11 +704,11 @@ function updateSummary(p) {
 // FUEL DISPLAY  (instant, no server call)
 // ════════════════════════════════════════════════════════════════
 function updateFuel() {
-  const carbs   = parseInt(document.getElementById('hourly-carbs').value);
-  const total   = Math.round(carbs * totalHours);
-  const barPct  = +document.getElementById('bars-pct').value / 100;
-  const gelPct  = +document.getElementById('gels-pct').value / 100;
-  const isoPct  = +document.getElementById('iso-pct').value  / 100;
+  const carbs  = parseInt(document.getElementById('hourly-carbs').value);
+  const total  = Math.round(carbs * totalHours);
+  const barPct = +document.getElementById('bars-pct').value / 100;
+  const gelPct = +document.getElementById('gels-pct').value / 100;
+  const isoPct = +document.getElementById('iso-pct').value  / 100;
 
   const bars = Math.ceil((total * barPct) / 30);
   const gels = Math.ceil((total * gelPct) / 25);
@@ -605,20 +718,34 @@ function updateFuel() {
   document.getElementById('f-bars').textContent  = bars + (bars === 1 ? ' bar'    : ' bars');
   document.getElementById('f-gels').textContent  = gels + (gels === 1 ? ' gel'    : ' gels');
   document.getElementById('f-iso').textContent   = iso  + (iso  === 1 ? ' bottle' : ' bottles');
+
+  // Red Zone advisory: >15 % anaerobic → suggest gel-heavy mix
+  const advisory = document.getElementById('zone-advisory');
+  if (baseWMax > 0 && redDistFraction > 0.15) {
+    const pct         = Math.round(redDistFraction * 100);
+    const curGelPct   = Math.round(gelPct * 100);
+    const suggestedGel = Math.min(80, Math.max(curGelPct, 60));
+    const suggestedBar = Math.max(0, 100 - suggestedGel - Math.round(isoPct * 100));
+    document.getElementById('zone-advisory-text').textContent =
+      pct + ' % of this route is anaerobic. Solid food absorption decreases above ~80 % W\u2098\u2090\u02E3 — '
+      + 'consider shifting to ~' + suggestedGel + ' % Gels / ~' + suggestedBar + ' % Bars to reduce GI risk.';
+    advisory.classList.remove('hidden');
+  } else {
+    advisory.classList.add('hidden');
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
-// CANVAS CHART
+// CANVAS CHART  (intensity-zone heatmap when VO2Max is set)
 // ════════════════════════════════════════════════════════════════
 function renderChart(data) {
   const canvas = document.getElementById('chart-canvas');
   document.getElementById('chart-placeholder').classList.add('hidden');
-  document.getElementById('chart-legend').classList.remove('hidden');
   canvas.classList.remove('hidden');
 
-  const dpr  = window.devicePixelRatio || 1;
-  const W    = canvas.parentElement.clientWidth - 32;
-  const H    = 280;
+  const dpr = window.devicePixelRatio || 1;
+  const W   = canvas.parentElement.clientWidth - 32;
+  const H   = 280;
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
   canvas.style.width  = W + 'px';
@@ -635,8 +762,11 @@ function renderChart(data) {
   const eles  = data.map(r => r.e);
   const watts = data.map(r => r.w);
   const minE  = Math.min(...eles), maxE = Math.max(...eles);
-  const maxW  = Math.max(...watts) * 1.15 || 1;
   const eRng  = (maxE - minE) || 1;
+
+  // Ensure W_max ceiling fits inside the chart scale
+  const allW  = baseWMax > 0 ? [...watts, baseWMax] : watts;
+  const maxW  = (Math.max(...allW) || 1) * 1.15;
 
   const toX  = d => pL + (d / maxD) * cW;
   const toYe = e => pT + cH - ((e - minE) / eRng) * cH;
@@ -666,15 +796,40 @@ function renderChart(data) {
   ctx.fillStyle = grd;
   ctx.fill();
 
-  // Elevation line
+  // Elevation outline
   ctx.beginPath();
   data.forEach((r, i) => { i === 0 ? ctx.moveTo(toX(r.d), toYe(r.e)) : ctx.lineTo(toX(r.d), toYe(r.e)); });
   ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.5; ctx.stroke();
 
-  // Power line
-  ctx.beginPath();
-  data.forEach((r, i) => { i === 0 ? ctx.moveTo(toX(r.d), toYw(r.w)) : ctx.lineTo(toX(r.d), toYw(r.w)); });
-  ctx.strokeStyle = '#f97316'; ctx.lineWidth = 1.5; ctx.stroke();
+  if (baseWMax > 0) {
+    // ── Zone-colored power line (segment by segment) ──────────
+    const zColor = { green: '#22c55e', yellow: '#eab308', red: '#ef4444' };
+    ctx.lineWidth = 2;
+    for (let i = 0; i < data.length - 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(toX(data[i].d),     toYw(data[i].w));
+      ctx.lineTo(toX(data[i + 1].d), toYw(data[i + 1].w));
+      ctx.strokeStyle = zColor[data[i].z] || '#f97316';
+      ctx.stroke();
+    }
+
+    // ── Altitude-adjusted W_max ceiling (dashed amber) ────────
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = 'rgba(251,191,36,0.65)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    data.forEach((r, i) => {
+      const y = toYw(r.wm > 0 ? r.wm : baseWMax);
+      i === 0 ? ctx.moveTo(toX(r.d), y) : ctx.lineTo(toX(r.d), y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+  } else {
+    // ── Plain orange power line (no VO2Max set) ────────────────
+    ctx.beginPath();
+    data.forEach((r, i) => { i === 0 ? ctx.moveTo(toX(r.d), toYw(r.w)) : ctx.lineTo(toX(r.d), toYw(r.w)); });
+    ctx.strokeStyle = '#f97316'; ctx.lineWidth = 1.5; ctx.stroke();
+  }
 
   // X axis labels
   ctx.fillStyle = '#4b5563'; ctx.font = '10px system-ui, sans-serif'; ctx.textAlign = 'center';
@@ -691,10 +846,40 @@ function renderChart(data) {
   }
 
   // Right Y (watts)
-  ctx.textAlign = 'left'; ctx.fillStyle = '#f97316';
+  ctx.textAlign = 'left'; ctx.fillStyle = '#9ca3af';
   for (let i = 0; i <= 4; i++) {
     const w = maxW * i / 4;
     ctx.fillText(Math.round(w) + ' W', pL + cW + 6, toYw(w) + 3.5);
+  }
+
+  // Dynamic legend
+  const legendEl = document.getElementById('chart-legend');
+  legendEl.classList.remove('hidden');
+  if (baseWMax > 0) {
+    legendEl.innerHTML =
+      '<span class="flex items-center gap-1.5 text-xs text-sky-400">' +
+        '<span class="inline-block w-3 h-3 rounded-sm" style="background:rgba(56,189,248,0.4)"></span>Elevation' +
+      '</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-green-400">' +
+        '<span class="inline-block w-4 h-0.5 bg-green-400 rounded"></span>Aerobic' +
+      '</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-yellow-400">' +
+        '<span class="inline-block w-4 h-0.5 bg-yellow-400 rounded"></span>Threshold' +
+      '</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-red-400">' +
+        '<span class="inline-block w-4 h-0.5 bg-red-400 rounded"></span>Anaerobic' +
+      '</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-amber-400/70">' +
+        '<span class="inline-block w-5 border-t border-dashed border-amber-400/70 mt-px"></span>W<sub>max</sub>' +
+      '</span>';
+  } else {
+    legendEl.innerHTML =
+      '<span class="flex items-center gap-1.5 text-xs text-sky-400">' +
+        '<span class="inline-block w-3 h-3 rounded-sm" style="background:rgba(56,189,248,0.4)"></span>Elevation' +
+      '</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-orange-400">' +
+        '<span class="inline-block w-4 h-0.5 bg-orange-400 rounded"></span>Power' +
+      '</span>';
   }
 }
 
@@ -705,19 +890,26 @@ window.addEventListener('resize', () => { if (computed) renderChart(computed); }
 // TABLE
 // ════════════════════════════════════════════════════════════════
 function updateTable(data) {
-  const tbody = document.getElementById('table-body');
+  const tbody    = document.getElementById('table-body');
+  const hasZones = baseWMax > 0;
   tbody.innerHTML = '';
   data.slice(0, 50).forEach(r => {
     const gradClass = r.g > 6 ? 'text-red-400' : r.g < -4 ? 'text-sky-400' : 'text-gray-300';
+    const zoneBadge = hasZones
+      ? { green:  '<span class="text-green-400">●</span>',
+          yellow: '<span class="text-yellow-400">●</span>',
+          red:    '<span class="text-red-400">● <span class="text-red-600 font-medium">crit</span></span>' }[r.z] ?? '—'
+      : '—';
     const tr = document.createElement('tr');
-    tr.className = 'hover:bg-gray-800/30 transition-colors';
+    tr.className = 'hover:bg-gray-800/30 transition-colors' + (r.z === 'red' && hasZones ? ' bg-red-950/10' : '');
     tr.innerHTML =
-      '<td class="py-1.5 pr-3 text-gray-500">' + (r.d/1000).toFixed(2) + ' km</td>' +
-      '<td class="py-1.5 pr-3 text-right text-gray-300">' + r.e.toFixed(1) + ' m</td>' +
-      '<td class="py-1.5 pr-3 text-right ' + gradClass + '">' + r.g.toFixed(1) + '%</td>' +
-      '<td class="py-1.5 pr-3 text-right text-orange-300">' + r.w + ' W</td>' +
-      '<td class="py-1.5 pr-3 text-right text-gray-300">' + r.k + '</td>' +
-      '<td class="py-1.5 text-right text-green-400">' + r.c + ' g</td>';
+      '<td class="py-1.5 pr-3 text-gray-500">'              + (r.d / 1000).toFixed(2) + ' km</td>' +
+      '<td class="py-1.5 pr-3 text-right text-gray-300">'   + r.e.toFixed(1)           + ' m</td>' +
+      '<td class="py-1.5 pr-3 text-right ' + gradClass + '">' + r.g.toFixed(1)         + '%</td>' +
+      '<td class="py-1.5 pr-3 text-right text-orange-300">' + r.w                      + ' W</td>' +
+      '<td class="py-1.5 pr-3 text-right text-gray-300">'   + r.k                      + '</td>' +
+      '<td class="py-1.5 pr-3 text-right text-green-400">'  + r.c                      + ' g</td>' +
+      '<td class="py-1.5 text-right">'                       + zoneBadge                + '</td>';
     tbody.appendChild(tr);
   });
   document.getElementById('table-section').classList.remove('hidden');
@@ -728,15 +920,18 @@ function updateTable(data) {
 // ════════════════════════════════════════════════════════════════
 function exportCSV() {
   if (!computed) return;
-  const rows = ['Distance,Elevation,Gradient,Watts,Kcal_Cumulative,Carbs_Required'];
+  const rows = ['Distance,Elevation,Gradient,Watts,Kcal_Cumulative,Carbs_Required,Zone,Intensity_Ratio,WMax_Adjusted'];
   computed.forEach(r => {
     rows.push([
-      (r.d/1000).toFixed(2),
+      (r.d / 1000).toFixed(2),
       r.e.toFixed(1),
       r.g.toFixed(2),
       r.w,
       r.k,
       r.c,
+      r.z,
+      r.r,
+      r.wm > 0 ? r.wm : '',
     ].join(','));
   });
   const a = Object.assign(document.createElement('a'), {
@@ -744,15 +939,6 @@ function exportCSV() {
     download: 'sport-performance.csv',
   });
   a.click();
-}
-
-// ════════════════════════════════════════════════════════════════
-// UTILS
-// ════════════════════════════════════════════════════════════════
-function showError(msg) {
-  const el = document.getElementById('error-msg');
-  el.textContent = '⚠ ' + msg;
-  el.classList.remove('hidden');
 }
 </script>
 </body>
