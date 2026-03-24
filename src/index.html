@@ -121,6 +121,13 @@
             </div>
             <input type="range" id="efficiency" min="15" max="35" value="24" step="1" class="w-full"
               oninput="document.getElementById('efficiency-val').textContent = this.value + '%'; onParamChange()">
+            <p class="text-xs text-gray-600 mt-1.5 leading-relaxed">
+              How efficiently your body converts food energy into mechanical work.
+              <strong class="text-gray-500">24 %</strong> is the standard default for most trained cyclists and runners.
+              Recreational athletes are typically <strong class="text-gray-500">20–22 %</strong>;
+              elite athletes can reach <strong class="text-gray-500">26–28 %</strong>.
+              A higher value lowers the kcal burn estimate.
+            </p>
           </div>
           <div>
             <div class="flex justify-between mb-1.5">
@@ -129,6 +136,14 @@
             </div>
             <input type="range" id="hourly-carbs" min="30" max="120" value="60" step="5" class="w-full"
               oninput="document.getElementById('hourly-carbs-val').textContent = this.value + ' g/hr'; onParamChange()">
+            <p class="text-xs text-gray-600 mt-1.5 leading-relaxed">
+              Carbohydrates you plan to consume per hour of effort.
+              <strong class="text-gray-500">30–60 g/hr</strong> suits most training rides and runs under 2 h.
+              For long-distance events (&gt; 2.5 h) aim for
+              <strong class="text-gray-500">60–90 g/hr</strong>.
+              Elite endurance athletes with trained guts can absorb up to
+              <strong class="text-gray-500">120 g/hr</strong> using mixed carb sources.
+            </p>
           </div>
         </div>
       </div>
@@ -210,7 +225,7 @@
 
       <!-- Summary Cards -->
       <div id="summary-section" class="hidden fade-in">
-        <div class="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-3">
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-3">
           <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
             <p class="text-xs text-gray-600 mb-0.5">Distance</p>
             <p id="s-distance" class="text-base font-bold text-white">—</p>
@@ -230,6 +245,11 @@
           <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
             <p class="text-xs text-gray-600 mb-0.5">Avg Power</p>
             <p id="s-power" class="text-base font-bold text-white">—</p>
+          </div>
+          <div class="bg-gray-900 border border-orange-900/50 rounded-xl p-3">
+            <p class="text-xs text-orange-700 mb-0.5">⚡ Max Power</p>
+            <p id="s-maxpower" class="text-base font-bold text-orange-400">—</p>
+            <p id="s-maxpower-grad" class="text-xs text-gray-600 mt-0.5">—</p>
           </div>
         </div>
 
@@ -529,11 +549,18 @@ function updateSummary(p) {
   }, 0);
   const avgW = computed.reduce((s, r) => s + r.w, 0) / (computed.length || 1);
 
+  // Max power: find the interval with the highest wattage
+  const maxRow = computed.reduce((best, r) => r.w > best.w ? r : best, computed[0]);
+  const maxW   = maxRow?.w ?? 0;
+  const maxG   = maxRow?.g ?? 0;  // gradient % at that segment
+
   document.getElementById('s-distance').textContent  = distKm.toFixed(1) + ' km';
   document.getElementById('s-time').textContent      = hh + 'h ' + String(mm).padStart(2,'0') + 'm';
   document.getElementById('s-elevation').textContent = Math.round(elevGain) + ' m';
   document.getElementById('s-kcal').textContent      = Math.round(last?.k ?? 0) + ' kcal';
   document.getElementById('s-power').textContent     = Math.round(avgW) + ' W';
+  document.getElementById('s-maxpower').textContent  = Math.round(maxW) + ' W';
+  document.getElementById('s-maxpower-grad').textContent = 'at ' + maxG.toFixed(1) + '% grade';
   document.getElementById('summary-section').classList.remove('hidden');
 }
 
