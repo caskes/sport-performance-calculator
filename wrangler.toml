@@ -1,0 +1,10 @@
+name = "sport-performance-calculator"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
+
+[vars]
+APP_NAME = "Sport Performance Calculator"

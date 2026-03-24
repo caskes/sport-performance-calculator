@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sport Performance Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    input[type="range"] { accent-color: #f97316; cursor: pointer; }
+    input[type="radio"]  { accent-color: #f97316; }
+    .fade-in { animation: fadeIn 0.35s ease both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .drop-active { border-color: #f97316 !important; background-color: rgba(249,115,22,0.05); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #111827; }
+    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<header class="border-b border-gray-800 bg-gray-900 sticky top-0 z-10">
+  <div class="max-w-7xl mx-auto px-5 py-3 flex items-center justify-between">
+    <div>
+      <h1 class="text-base font-bold text-white tracking-tight">⚡ Sport Performance Calculator</h1>
+      <p class="text-xs text-gray-500">Bio-Mechanical &amp; Nutritional GPX Processor</p>
+    </div>
+    <div class="flex bg-gray-800 rounded-lg p-1 gap-1">
+      <button id="btn-cycling" onclick="setSport('cycling')"
+        class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-orange-500 text-white">
+        🚴 Cycling
+      </button>
+      <button id="btn-running" onclick="setSport('running')"
+        class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white">
+        🏃 Running
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<main class="max-w-7xl mx-auto px-5 py-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+    <!-- ══ LEFT PANEL ══ -->
+    <div class="space-y-4">
+
+      <!-- File Upload -->
+      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Route File</h2>
+        <div id="drop-zone"
+          class="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center cursor-pointer hover:border-orange-500/60 transition-colors"
+          onclick="document.getElementById('file-input').click()"
+          ondragover="event.preventDefault(); this.classList.add('drop-active')"
+          ondragleave="this.classList.remove('drop-active')"
+          ondrop="handleDrop(event)">
+          <div class="text-3xl mb-2 select-none">📁</div>
+          <p class="text-sm text-gray-400">Drop GPX or KML here</p>
+          <p class="text-xs text-gray-600 mt-0.5">or click to browse</p>
+          <p id="filename-display" class="text-sm text-orange-400 mt-2 font-medium hidden"></p>
+        </div>
+        <input type="file" id="file-input" accept=".gpx,.kml" class="hidden" onchange="handleFileSelect(this)">
+      </div>
+
+      <!-- Athlete Profile -->
+      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Athlete Profile</h2>
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs text-gray-500 block mb-1">Body Weight (kg)</label>
+            <input type="number" id="body-weight" value="75" min="30" max="200" step="0.5"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
+              oninput="onParamChange()">
+          </div>
+          <div>
+            <label id="kit-label" class="text-xs text-gray-500 block mb-1">Bike + Kit Weight (kg)</label>
+            <input type="number" id="kit-weight" value="8" min="0" max="30" step="0.5"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
+              oninput="onParamChange()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Target -->
+      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Target</h2>
+        <div class="space-y-3">
+          <div class="flex gap-4">
+            <label class="flex items-center gap-2 cursor-pointer text-sm">
+              <input type="radio" name="target-type" value="speed" checked onchange="toggleTargetInput()">
+              Speed
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer text-sm">
+              <input type="radio" name="target-type" value="time" onchange="toggleTargetInput()">
+              Total Time
+            </label>
+          </div>
+          <div id="speed-wrap">
+            <label class="text-xs text-gray-500 block mb-1">Target Speed (km/h)</label>
+            <input type="number" id="target-speed" value="30" min="5" max="120" step="0.5"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
+              oninput="onParamChange()">
+          </div>
+          <div id="time-wrap" class="hidden">
+            <label class="text-xs text-gray-500 block mb-1">Target Time (HH:MM)</label>
+            <input type="text" id="target-time" placeholder="04:30"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm font-mono focus:border-orange-500 focus:outline-none transition-colors"
+              oninput="onParamChange()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Physiology -->
+      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Physiology</h2>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between mb-1.5">
+              <label class="text-xs text-gray-500">Metabolic Efficiency</label>
+              <span id="efficiency-val" class="text-xs text-orange-400 font-mono">24%</span>
+            </div>
+            <input type="range" id="efficiency" min="15" max="35" value="24" step="1" class="w-full"
+              oninput="document.getElementById('efficiency-val').textContent = this.value + '%'; onParamChange()">
+          </div>
+          <div>
+            <div class="flex justify-between mb-1.5">
+              <label class="text-xs text-gray-500">Hourly Carb Target</label>
+              <span id="hourly-carbs-val" class="text-xs text-orange-400 font-mono">60 g/hr</span>
+            </div>
+            <input type="range" id="hourly-carbs" min="30" max="120" value="60" step="5" class="w-full"
+              oninput="document.getElementById('hourly-carbs-val').textContent = this.value + ' g/hr'; onParamChange()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Nutrition Mixer -->
+      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Nutrition Mixer</h2>
+          <span id="mix-badge" class="text-xs font-mono text-gray-500">Σ <span id="mix-total">100</span>%</span>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between mb-1.5">
+              <label class="text-xs text-gray-500">🍫 Energy Bars <span class="text-gray-700">(30 g carbs)</span></label>
+              <span id="bars-val" class="text-xs text-orange-400 font-mono">40%</span>
+            </div>
+            <input type="range" id="bars-pct" min="0" max="100" value="40" step="5" class="w-full" oninput="updateMix()">
+          </div>
+          <div>
+            <div class="flex justify-between mb-1.5">
+              <label class="text-xs text-gray-500">💧 Gels <span class="text-gray-700">(25 g carbs)</span></label>
+              <span id="gels-val" class="text-xs text-orange-400 font-mono">30%</span>
+            </div>
+            <input type="range" id="gels-pct" min="0" max="100" value="30" step="5" class="w-full" oninput="updateMix()">
+          </div>
+          <div>
+            <div class="flex justify-between mb-1.5">
+              <label class="text-xs text-gray-500">🥤 Isotonic Drink <span class="text-gray-700">(30 g/500 ml)</span></label>
+              <span id="iso-val" class="text-xs text-orange-400 font-mono">30%</span>
+            </div>
+            <input type="range" id="iso-pct" min="0" max="100" value="30" step="5" class="w-full" oninput="updateMix()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Smoothing -->
+      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+        <div class="flex justify-between mb-1.5">
+          <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Elevation Smoothing</h2>
+          <span id="smoothing-val" class="text-xs text-orange-400 font-mono">5</span>
+        </div>
+        <input type="range" id="smoothing" min="1" max="25" value="5" step="1" class="w-full"
+          oninput="document.getElementById('smoothing-val').textContent = this.value; onParamChange()">
+        <p class="text-xs text-gray-700 mt-1.5">Applies moving average to reduce GPS elevation noise</p>
+      </div>
+
+      <!-- Process Button -->
+      <button id="process-btn" onclick="processData()"
+        class="w-full bg-orange-500 hover:bg-orange-400 disabled:bg-gray-800 disabled:text-gray-600 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition-colors text-sm"
+        disabled>
+        ⚡ Process File
+      </button>
+
+      <div id="error-msg" class="hidden bg-red-950 border border-red-800 text-red-300 text-xs rounded-lg p-3 leading-relaxed"></div>
+    </div>
+
+    <!-- ══ RIGHT PANEL ══ -->
+    <div class="lg:col-span-2 space-y-4">
+
+      <!-- Elevation + Power Chart -->
+      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Elevation &amp; Power Profile</h2>
+          <div id="chart-legend" class="hidden flex gap-4">
+            <span class="flex items-center gap-1.5 text-xs text-sky-400">
+              <span class="inline-block w-3 h-3 rounded-sm" style="background:rgba(56,189,248,0.4)"></span>Elevation
+            </span>
+            <span class="flex items-center gap-1.5 text-xs text-orange-400">
+              <span class="inline-block w-4 h-0.5 bg-orange-400 rounded"></span>Power
+            </span>
+          </div>
+        </div>
+        <div id="chart-placeholder" class="flex flex-col items-center justify-center py-16 text-gray-700">
+          <div class="text-5xl mb-3 opacity-40">📈</div>
+          <p class="text-sm">Upload a GPX or KML file and press Process</p>
+        </div>
+        <canvas id="chart-canvas" class="hidden w-full rounded-lg" style="height:280px"></canvas>
+      </div>
+
+      <!-- Summary Cards -->
+      <div id="summary-section" class="hidden fade-in">
+        <div class="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-3">
+          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
+            <p class="text-xs text-gray-600 mb-0.5">Distance</p>
+            <p id="s-distance" class="text-base font-bold text-white">—</p>
+          </div>
+          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
+            <p class="text-xs text-gray-600 mb-0.5">Est. Time</p>
+            <p id="s-time" class="text-base font-bold text-white">—</p>
+          </div>
+          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
+            <p class="text-xs text-gray-600 mb-0.5">Elev. Gain</p>
+            <p id="s-elevation" class="text-base font-bold text-white">—</p>
+          </div>
+          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
+            <p class="text-xs text-gray-600 mb-0.5">Energy</p>
+            <p id="s-kcal" class="text-base font-bold text-white">—</p>
+          </div>
+          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
+            <p class="text-xs text-gray-600 mb-0.5">Avg Power</p>
+            <p id="s-power" class="text-base font-bold text-white">—</p>
+          </div>
+        </div>
+
+        <!-- Fuel Plan -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Fuel Plan</h3>
+            <span class="text-xs text-gray-700">Updates instantly with mixer changes</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="bg-gray-800 rounded-lg p-3">
+              <p class="text-xs text-gray-500 mb-0.5">Total Carbs</p>
+              <p id="f-carbs" class="text-xl font-bold text-orange-400">—</p>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-3">
+              <p class="text-xs text-gray-500 mb-0.5">🍫 Bars</p>
+              <p id="f-bars" class="text-xl font-bold text-white">—</p>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-3">
+              <p class="text-xs text-gray-500 mb-0.5">💧 Gels</p>
+              <p id="f-gels" class="text-xl font-bold text-white">—</p>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-3">
+              <p class="text-xs text-gray-500 mb-0.5">🥤 Bottles</p>
+              <p id="f-iso" class="text-xl font-bold text-white">—</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div id="table-section" class="hidden bg-gray-900 border border-gray-800 rounded-xl p-4 fade-in">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Interval Data</h2>
+          <button onclick="exportCSV()"
+            class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition-colors border border-gray-700 font-medium">
+            ⬇ Export CSV
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="text-gray-600 border-b border-gray-800">
+                <th class="text-left py-2 pr-3 font-medium">Distance</th>
+                <th class="text-right py-2 pr-3 font-medium">Elevation</th>
+                <th class="text-right py-2 pr-3 font-medium">Gradient</th>
+                <th class="text-right py-2 pr-3 font-medium">Power</th>
+                <th class="text-right py-2 pr-3 font-medium">kcal (cum)</th>
+                <th class="text-right py-2 font-medium">Carbs (cum)</th>
+              </tr>
+            </thead>
+            <tbody id="table-body" class="divide-y divide-gray-800/50"></tbody>
+          </table>
+        </div>
+        <p class="text-xs text-gray-700 mt-2">Showing first 50 intervals — export CSV for full dataset.</p>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════
+let sport = 'cycling';
+let rawIntervals = null;   // [{d, e}] from server
+let computed = null;       // [{d, e, g, w, k, c}] after client physics
+let totalDistM = 0;
+let totalHours = 0;
+
+// ════════════════════════════════════════════════════════════════
+// SPORT TOGGLE
+// ════════════════════════════════════════════════════════════════
+function setSport(s) {
+  sport = s;
+  const active = 'px-3 py-1 rounded-md text-xs font-semibold transition-all bg-orange-500 text-white';
+  const idle   = 'px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white';
+  document.getElementById('btn-cycling').className = s === 'cycling' ? active : idle;
+  document.getElementById('btn-running').className = s === 'running'  ? active : idle;
+  document.getElementById('kit-label').textContent = s === 'cycling' ? 'Bike + Kit Weight (kg)' : 'Running Kit Weight (kg)';
+  document.getElementById('kit-weight').value = s === 'cycling' ? '8' : '0.5';
+  document.getElementById('target-speed').value = s === 'cycling' ? '30' : '12';
+  if (rawIntervals) recalculate();
+}
+
+// ════════════════════════════════════════════════════════════════
+// TARGET INPUT TOGGLE
+// ════════════════════════════════════════════════════════════════
+function toggleTargetInput() {
+  const useSpeed = document.querySelector('input[name="target-type"][value="speed"]').checked;
+  document.getElementById('speed-wrap').classList.toggle('hidden', !useSpeed);
+  document.getElementById('time-wrap').classList.toggle('hidden', useSpeed);
+  if (rawIntervals) recalculate();
+}
+
+// ════════════════════════════════════════════════════════════════
+// NUTRITION MIXER  (instant update)
+// ════════════════════════════════════════════════════════════════
+function updateMix() {
+  const b = +document.getElementById('bars-pct').value;
+  const g = +document.getElementById('gels-pct').value;
+  const i = +document.getElementById('iso-pct').value;
+  document.getElementById('bars-val').textContent = b + '%';
+  document.getElementById('gels-val').textContent = g + '%';
+  document.getElementById('iso-val').textContent  = i + '%';
+  const sum = b + g + i;
+  document.getElementById('mix-total').textContent = sum;
+  document.getElementById('mix-badge').className =
+    'text-xs font-mono ' + (sum === 100 ? 'text-green-500' : 'text-red-400');
+  if (totalHours > 0) updateFuel();
+}
+
+// ════════════════════════════════════════════════════════════════
+// FILE HANDLING
+// ════════════════════════════════════════════════════════════════
+let selectedFile = null;
+
+function handleDrop(ev) {
+  ev.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drop-active');
+  const f = ev.dataTransfer.files[0];
+  if (f) setFile(f);
+}
+
+function handleFileSelect(input) {
+  if (input.files[0]) setFile(input.files[0]);
+}
+
+function setFile(f) {
+  selectedFile = f;
+  const disp = document.getElementById('filename-display');
+  disp.textContent = '✓ ' + f.name;
+  disp.classList.remove('hidden');
+  document.getElementById('process-btn').disabled = false;
+}
+
+// ════════════════════════════════════════════════════════════════
+// PROCESS  (server call to parse GPX/KML)
+// ════════════════════════════════════════════════════════════════
+async function processData() {
+  if (!selectedFile) return;
+  const btn = document.getElementById('process-btn');
+  btn.textContent = '⏳ Parsing...';
+  btn.disabled = true;
+  document.getElementById('error-msg').classList.add('hidden');
+
+  try {
+    const fd = new FormData();
+    fd.append('file', selectedFile);
+    const res = await fetch('/api/parse', { method: 'POST', body: fd });
+    const json = await res.json();
+    if (!res.ok || json.error) throw new Error(json.error || 'Server error');
+    rawIntervals = json.intervals;
+    recalculate();
+  } catch (e) {
+    showError(e.message);
+  } finally {
+    btn.textContent = '⚡ Process File';
+    btn.disabled = !selectedFile;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// PARAM CHANGE HANDLER
+// ════════════════════════════════════════════════════════════════
+function onParamChange() {
+  if (rawIntervals) recalculate();
+}
+
+// ════════════════════════════════════════════════════════════════
+// RECALCULATE  (client-side physics + nutrition)
+// ════════════════════════════════════════════════════════════════
+function recalculate() {
+  const p = getParams();
+  if (!p) return;
+
+  const smoothed = applySmoothing(rawIntervals, p.smoothing);
+  computed = applyPhysics(smoothed, p);
+
+  totalDistM = rawIntervals[rawIntervals.length - 1]?.d ?? 0;
+  totalHours = totalDistM / 1000 / p.speedKmh;
+
+  updateSummary(p);
+  updateFuel();
+  renderChart(computed);
+  updateTable(computed);
+}
+
+function getParams() {
+  const body  = parseFloat(document.getElementById('body-weight').value) || 75;
+  const kit   = parseFloat(document.getElementById('kit-weight').value)  || 0;
+  const eff   = parseInt(document.getElementById('efficiency').value)    / 100;
+  const carbs = parseInt(document.getElementById('hourly-carbs').value);
+  const win   = parseInt(document.getElementById('smoothing').value);
+
+  let speedKmh;
+  if (document.querySelector('input[name="target-type"][value="speed"]').checked) {
+    speedKmh = parseFloat(document.getElementById('target-speed').value) || 30;
+  } else {
+    const t = document.getElementById('target-time').value;
+    const [hh, mm] = t.split(':').map(Number);
+    const hrs = (hh || 0) + (mm || 0) / 60;
+    const km  = (rawIntervals?.[rawIntervals.length - 1]?.d ?? 0) / 1000;
+    speedKmh  = hrs > 0 && km > 0 ? km / hrs : 30;
+  }
+
+  return { mass: body + kit, eff, carbs, smoothing: win, speedKmh };
+}
+
+// ════════════════════════════════════════════════════════════════
+// SMOOTHING  (moving average on elevations → recalc gradients)
+// ════════════════════════════════════════════════════════════════
+function applySmoothing(intervals, win) {
+  const eles = intervals.map(iv => iv.e);
+  const sm   = movingAvg(eles, win);
+  return intervals.map((iv, i) => {
+    const nextE  = i < intervals.length - 1 ? sm[i + 1] : sm[i];
+    const segLen = i < intervals.length - 1 ? intervals[i + 1].d - iv.d : 100;
+    const grad   = segLen > 0 ? (nextE - sm[i]) / segLen : 0; // dimensionless
+    return { d: iv.d, e: sm[i], g: grad };
+  });
+}
+
+function movingAvg(arr, win) {
+  if (win <= 1) return arr.slice();
+  const half = Math.floor(win / 2);
+  return arr.map((_, i) => {
+    let sum = 0, n = 0;
+    for (let j = Math.max(0, i - half); j <= Math.min(arr.length - 1, i + half); j++) {
+      sum += arr[j]; n++;
+    }
+    return sum / n;
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// PHYSICS ENGINE  (100 m interval model)
+// ════════════════════════════════════════════════════════════════
+function applyPhysics(intervals, p) {
+  const v  = p.speedKmh / 3.6;  // m/s
+  const g  = 9.81;
+  const m  = p.mass;
+  const distTotal = intervals[intervals.length - 1]?.d ?? 0;
+  const hrs = distTotal / 1000 / p.speedKmh;
+  const carbsTotal = p.carbs * hrs;
+
+  let kcalCum = 0, carbsCum = 0;
+
+  return intervals.map((iv, i) => {
+    const slope  = iv.g;  // dimensionless rise/run
+    const segLen = i < intervals.length - 1 ? intervals[i + 1].d - iv.d : 100;
+
+    let watts = 0, kcalSeg = 0;
+
+    if (sport === 'cycling') {
+      const pGrav = m * g * v * slope;
+      const pRoll = 0.004 * m * g * v;
+      const pAero = 0.5 * 1.15 * 0.35 * v * v * v;
+      watts = Math.max(0, (pGrav + pRoll + pAero) / 0.97);
+      const timeSeg = v > 0 ? segLen / v : 0;
+      kcalSeg = (watts * timeSeg / 1000) / 4.184 / p.eff;
+    } else {
+      // Running: E = m × dist_km × Cr  (Cr ≈ 1.02 kcal/kg/km)
+      kcalSeg = m * (segLen / 1000) * 1.02;
+      const timeSeg = v > 0 ? segLen / v : 0;
+      watts = timeSeg > 0 ? (kcalSeg * 4184 * p.eff) / timeSeg : 0;
+    }
+
+    kcalCum  += kcalSeg;
+    const carbsSeg = distTotal > 0 ? carbsTotal * (segLen / distTotal) : 0;
+    carbsCum += carbsSeg;
+
+    return {
+      d: iv.d,
+      e: iv.e,
+      g: iv.g * 100,  // as % for display
+      w: Math.round(watts * 10) / 10,
+      k: Math.round(kcalCum * 10) / 10,
+      c: Math.round(carbsCum * 10) / 10,
+    };
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// SUMMARY UPDATE
+// ════════════════════════════════════════════════════════════════
+function updateSummary(p) {
+  const distKm = totalDistM / 1000;
+  const hh = Math.floor(totalHours);
+  const mm = Math.round((totalHours - hh) * 60);
+  const last = computed[computed.length - 1];
+  const elevGain = computed.reduce((acc, r, i) => {
+    if (i === 0) return acc;
+    const d = computed[i].e - computed[i - 1].e;
+    return acc + (d > 0 ? d : 0);
+  }, 0);
+  const avgW = computed.reduce((s, r) => s + r.w, 0) / (computed.length || 1);
+
+  document.getElementById('s-distance').textContent  = distKm.toFixed(1) + ' km';
+  document.getElementById('s-time').textContent      = hh + 'h ' + String(mm).padStart(2,'0') + 'm';
+  document.getElementById('s-elevation').textContent = Math.round(elevGain) + ' m';
+  document.getElementById('s-kcal').textContent      = Math.round(last?.k ?? 0) + ' kcal';
+  document.getElementById('s-power').textContent     = Math.round(avgW) + ' W';
+  document.getElementById('summary-section').classList.remove('hidden');
+}
+
+// ════════════════════════════════════════════════════════════════
+// FUEL DISPLAY  (instant, no server call)
+// ════════════════════════════════════════════════════════════════
+function updateFuel() {
+  const carbs   = parseInt(document.getElementById('hourly-carbs').value);
+  const total   = Math.round(carbs * totalHours);
+  const barPct  = +document.getElementById('bars-pct').value / 100;
+  const gelPct  = +document.getElementById('gels-pct').value / 100;
+  const isoPct  = +document.getElementById('iso-pct').value  / 100;
+
+  const bars = Math.ceil((total * barPct) / 30);
+  const gels = Math.ceil((total * gelPct) / 25);
+  const iso  = Math.ceil((total * isoPct) / 30);
+
+  document.getElementById('f-carbs').textContent = total + ' g';
+  document.getElementById('f-bars').textContent  = bars + (bars === 1 ? ' bar'    : ' bars');
+  document.getElementById('f-gels').textContent  = gels + (gels === 1 ? ' gel'    : ' gels');
+  document.getElementById('f-iso').textContent   = iso  + (iso  === 1 ? ' bottle' : ' bottles');
+}
+
+// ════════════════════════════════════════════════════════════════
+// CANVAS CHART
+// ════════════════════════════════════════════════════════════════
+function renderChart(data) {
+  const canvas = document.getElementById('chart-canvas');
+  document.getElementById('chart-placeholder').classList.add('hidden');
+  document.getElementById('chart-legend').classList.remove('hidden');
+  canvas.classList.remove('hidden');
+
+  const dpr  = window.devicePixelRatio || 1;
+  const W    = canvas.parentElement.clientWidth - 32;
+  const H    = 280;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pL = 56, pR = 56, pT = 12, pB = 34;
+  const cW = W - pL - pR;
+  const cH = H - pT - pB;
+
+  const maxD  = data[data.length - 1]?.d ?? 1;
+  const eles  = data.map(r => r.e);
+  const watts = data.map(r => r.w);
+  const minE  = Math.min(...eles), maxE = Math.max(...eles);
+  const maxW  = Math.max(...watts) * 1.15 || 1;
+  const eRng  = (maxE - minE) || 1;
+
+  const toX  = d => pL + (d / maxD) * cW;
+  const toYe = e => pT + cH - ((e - minE) / eRng) * cH;
+  const toYw = w => pT + cH - (w / maxW) * cH;
+
+  // Background
+  ctx.fillStyle = '#111827';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid
+  ctx.strokeStyle = '#1f2937';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pT + cH * i / 4;
+    ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(pL + cW, y); ctx.stroke();
+  }
+
+  // Elevation fill
+  ctx.beginPath();
+  ctx.moveTo(toX(data[0].d), pT + cH);
+  for (const r of data) ctx.lineTo(toX(r.d), toYe(r.e));
+  ctx.lineTo(toX(data[data.length - 1].d), pT + cH);
+  ctx.closePath();
+  const grd = ctx.createLinearGradient(0, pT, 0, pT + cH);
+  grd.addColorStop(0, 'rgba(56,189,248,0.45)');
+  grd.addColorStop(1, 'rgba(56,189,248,0.04)');
+  ctx.fillStyle = grd;
+  ctx.fill();
+
+  // Elevation line
+  ctx.beginPath();
+  data.forEach((r, i) => { i === 0 ? ctx.moveTo(toX(r.d), toYe(r.e)) : ctx.lineTo(toX(r.d), toYe(r.e)); });
+  ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Power line
+  ctx.beginPath();
+  data.forEach((r, i) => { i === 0 ? ctx.moveTo(toX(r.d), toYw(r.w)) : ctx.lineTo(toX(r.d), toYw(r.w)); });
+  ctx.strokeStyle = '#f97316'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // X axis labels
+  ctx.fillStyle = '#4b5563'; ctx.font = '10px system-ui, sans-serif'; ctx.textAlign = 'center';
+  for (let i = 0; i <= 6; i++) {
+    const d = maxD * i / 6;
+    ctx.fillText((d / 1000).toFixed(1) + ' km', toX(d), H - pB + 14);
+  }
+
+  // Left Y (elevation)
+  ctx.textAlign = 'right'; ctx.fillStyle = '#38bdf8';
+  for (let i = 0; i <= 4; i++) {
+    const e = minE + eRng * i / 4;
+    ctx.fillText(Math.round(e) + ' m', pL - 6, toYe(e) + 3.5);
+  }
+
+  // Right Y (watts)
+  ctx.textAlign = 'left'; ctx.fillStyle = '#f97316';
+  for (let i = 0; i <= 4; i++) {
+    const w = maxW * i / 4;
+    ctx.fillText(Math.round(w) + ' W', pL + cW + 6, toYw(w) + 3.5);
+  }
+}
+
+// Redraw on window resize
+window.addEventListener('resize', () => { if (computed) renderChart(computed); });
+
+// ════════════════════════════════════════════════════════════════
+// TABLE
+// ════════════════════════════════════════════════════════════════
+function updateTable(data) {
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+  data.slice(0, 50).forEach(r => {
+    const gradClass = r.g > 6 ? 'text-red-400' : r.g < -4 ? 'text-sky-400' : 'text-gray-300';
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-800/30 transition-colors';
+    tr.innerHTML =
+      '<td class="py-1.5 pr-3 text-gray-500">' + (r.d/1000).toFixed(2) + ' km</td>' +
+      '<td class="py-1.5 pr-3 text-right text-gray-300">' + r.e.toFixed(1) + ' m</td>' +
+      '<td class="py-1.5 pr-3 text-right ' + gradClass + '">' + r.g.toFixed(1) + '%</td>' +
+      '<td class="py-1.5 pr-3 text-right text-orange-300">' + r.w + ' W</td>' +
+      '<td class="py-1.5 pr-3 text-right text-gray-300">' + r.k + '</td>' +
+      '<td class="py-1.5 text-right text-green-400">' + r.c + ' g</td>';
+    tbody.appendChild(tr);
+  });
+  document.getElementById('table-section').classList.remove('hidden');
+}
+
+// ════════════════════════════════════════════════════════════════
+// CSV EXPORT
+// ════════════════════════════════════════════════════════════════
+function exportCSV() {
+  if (!computed) return;
+  const rows = ['Distance,Elevation,Gradient,Watts,Kcal_Cumulative,Carbs_Required'];
+  computed.forEach(r => {
+    rows.push([
+      (r.d/1000).toFixed(2),
+      r.e.toFixed(1),
+      r.g.toFixed(2),
+      r.w,
+      r.k,
+      r.c,
+    ].join(','));
+  });
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([rows.join('\n')], { type: 'text/csv' })),
+    download: 'sport-performance.csv',
+  });
+  a.click();
+}
+
+// ════════════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════════════
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = '⚠ ' + msg;
+  el.classList.remove('hidden');
+}
+</script>
+</body>
+</html>
