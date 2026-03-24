@@ -484,6 +484,22 @@ function setFile(f) {
   disp.textContent = '✓ ' + f.name;
   disp.classList.remove('hidden');
   document.getElementById('process-btn').disabled = false;
+
+  // Clear stale results from any previously processed file
+  rawIntervals = null;
+  computed     = null;
+  totalDistM   = 0;
+  totalHours   = 0;
+  baseWMax     = 0;
+  baseFTP      = 0;
+  redDistFraction = 0;
+  document.getElementById('summary-section').classList.add('hidden');
+  document.getElementById('table-section').classList.add('hidden');
+  document.getElementById('chart-canvas').classList.add('hidden');
+  document.getElementById('chart-placeholder').classList.remove('hidden');
+  document.getElementById('chart-legend').classList.add('hidden');
+  document.getElementById('error-msg').classList.add('hidden');
+  updateTargetIndication();
 }
 
 // ════════════════════════════════════════════════════════════════
