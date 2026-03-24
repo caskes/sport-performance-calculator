@@ -91,6 +91,22 @@
             </p>
             <p id="vo2-pace-hint" class="text-xs text-orange-400/70 mt-1 leading-relaxed hidden"></p>
           </div>
+          <div class="border-t border-gray-800 pt-3 space-y-2">
+            <label class="text-xs text-gray-500 block mb-1">FTP — Functional Threshold Power (W)</label>
+            <input type="number" id="ftp" placeholder="e.g. 250" min="50" max="600" step="1"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
+              oninput="onParamChange()">
+            <p class="text-xs text-gray-700 mt-1.5 leading-relaxed">
+              Max sustainable power for ~60 min (Coggan scale). Overrides VO₂ Max threshold when priority is on.
+              Typical values: recreational <strong class="text-gray-500">150–200 W</strong>,
+              trained <strong class="text-gray-500">200–300 W</strong>,
+              elite <strong class="text-gray-500">300–450 W</strong>.
+            </p>
+            <label class="flex items-center gap-2 cursor-pointer text-xs text-gray-400 mt-1 select-none">
+              <input type="checkbox" id="ftp-priority" class="accent-orange-500 cursor-pointer" onchange="onParamChange()">
+              Priority: use FTP for zone thresholds (overrides VO₂ Max estimate)
+            </label>
+          </div>
         </div>
       </div>
 
@@ -287,7 +303,7 @@
               <span class="text-xl shrink-0">🔴</span>
               <div>
                 <p class="text-xs font-semibold text-red-400">Critical Fatigue Zone</p>
-                <p class="text-xs text-gray-600 mt-0.5">Distance where required power exceeds aerobic ceiling (&gt; 95 % W<sub>max</sub>)</p>
+                <p class="text-xs text-gray-600 mt-0.5">Distance where required power exceeds threshold (&gt; 105 % — Zone 4 Anaerobic)</p>
               </div>
             </div>
             <div class="text-right shrink-0">
@@ -371,7 +387,9 @@ let computed = null;       // [{d,e,g,w,k,c,z,r,wm}] after physics
 let totalDistM = 0;
 let totalHours = 0;
 let baseWMax = 0;          // aerobic ceiling W (from VO2Max); 0 = not set
-let redDistFraction = 0;   // fraction of route in the red (anaerobic) zone
+let baseFTP  = 0;          // active zone threshold W (FTP or 0.8×W_max); 0 = zones off
+let thresholdLabel = '';   // 'FTP' | 'Threshold' — for chart legend
+let redDistFraction = 0;   // fraction of route in zone 4 (anaerobic)
 
 // ════════════════════════════════════════════════════════════════
 // SPORT TOGGLE
@@ -566,7 +584,9 @@ function getParams() {
     speedKmh  = hrs > 0 && km > 0 ? km / hrs : 30;
   }
 
-  return { mass: body + kit, bodyWeight: body, eff, carbs, smoothing: win, speedKmh, vo2max, hypoxia };
+  const ftp         = parseFloat(document.getElementById('ftp').value) || 0;
+  const ftpPriority = document.getElementById('ftp-priority').checked;
+  return { mass: body + kit, bodyWeight: body, eff, carbs, smoothing: win, speedKmh, vo2max, hypoxia, ftp, ftpPriority };
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -628,18 +648,26 @@ function applyPhysics(intervals, p) {
     ? (p.vo2max * p.bodyWeight * 20.1 * p.eff) / 60
     : 0;
 
+  // Active threshold for zone classification:
+  // FTP (if priority flag set) OR 80% of W_max (standard FTP estimate from VO2Max)
+  const useFTP = p.ftp > 0 && p.ftpPriority;
+  const thresholdBase = useFTP ? p.ftp : (baseWMax > 0 ? baseWMax * 0.80 : 0);
+  baseFTP = thresholdBase;
+  thresholdLabel = useFTP ? 'FTP' : (baseWMax > 0 ? 'Threshold (80% W\u2098\u2090\u02E3)' : '');
+
   let kcalCum = 0, carbsCum = 0;
 
   return intervals.map((iv, i) => {
     const slope  = iv.g;  // dimensionless rise/run
     const segLen = i < intervals.length - 1 ? intervals[i + 1].d - iv.d : 100;
 
-    // Altitude-adjusted ceiling & metabolic cost for this segment
-    let adjWMax = baseWMax;
+    // Altitude-adjusted threshold & metabolic cost multiplier
+    // Same ~1%/100m power-drop logic applies to FTP and W_max alike (Alpine Factor)
+    let adjTh   = thresholdBase;
     let metMult = 1.0;
-    if (p.hypoxia && baseWMax > 0) {
-      const hyp = applyAltitudeHypoxia(baseWMax, iv.e);
-      adjWMax = hyp.adjustedWMax;
+    if (p.hypoxia && thresholdBase > 0) {
+      const hyp = applyAltitudeHypoxia(thresholdBase, iv.e);
+      adjTh   = hyp.adjustedWMax;
       metMult = hyp.metabolicMultiplier;
     }
 
@@ -651,7 +679,6 @@ function applyPhysics(intervals, p) {
       const pAero = 0.5 * 1.15 * 0.35 * v * v * v;
       watts = Math.max(0, (pGrav + pRoll + pAero) / 0.97);
       const timeSeg = v > 0 ? segLen / v : 0;
-      // metabolicMultiplier applied to kcal (respiratory cost at altitude)
       kcalSeg = (watts * timeSeg / 1000) / 4.184 / p.eff * metMult;
     } else {
       // Running base energy; keep mechanical watts independent of metMult
@@ -665,20 +692,24 @@ function applyPhysics(intervals, p) {
     const carbsSeg = distTotal > 0 ? carbsTotal * (segLen / distTotal) : 0;
     carbsCum += carbsSeg;
 
-    // Intensity zone: ratio of required watts to altitude-adjusted ceiling
-    const ratio = adjWMax > 0 ? watts / adjWMax : 0;
-    const zone  = ratio > 0.95 ? 'red' : ratio >= 0.75 ? 'yellow' : 'green';
+    // 4-Zone Coggan classification (ratio vs altitude-adjusted threshold)
+    // Z1 Recovery/Endurance: < 75% | Z2 Tempo: 75–95% | Z3 Threshold: 95–105% | Z4 Anaerobic: >105%
+    const ratio = adjTh > 0 ? watts / adjTh : 0;
+    const zone  = ratio > 1.05 ? 'red'
+                : ratio >= 0.95 ? 'yellow'
+                : ratio >= 0.75 ? 'green'
+                : 'blue';
 
     return {
       d:  iv.d,
       e:  iv.e,
-      g:  iv.g * 100,              // gradient %
+      g:  iv.g * 100,                         // gradient %
       w:  Math.round(watts * 10) / 10,
       k:  Math.round(kcalCum * 10) / 10,
       c:  Math.round(carbsCum * 10) / 10,
-      z:  zone,                    // intensity zone
-      r:  Math.round(ratio * 1000) / 1000,  // intensity ratio
-      wm: Math.round(adjWMax),     // altitude-adjusted W_max at this segment
+      z:  zone,                               // intensity zone
+      r:  Math.round(ratio * 1000) / 1000,    // intensity ratio vs threshold
+      wm: Math.round(adjTh),                  // altitude-adjusted threshold at this segment
     };
   });
 }
@@ -727,7 +758,7 @@ function updateSummary(p) {
   }
   if (curDurS > bestDurS) bestDurS = curDurS;
 
-  // Red zone distance (only meaningful when baseWMax is set)
+  // Zone 4 distance (Anaerobic — only meaningful when threshold is set)
   let redDistM = 0;
   for (let i = 0; i < computed.length; i++) {
     if (computed[i].z === 'red') {
@@ -745,9 +776,9 @@ function updateSummary(p) {
   document.getElementById('s-maxpower-grad').textContent = 'at ' + maxG.toFixed(1) + '% grade';
   document.getElementById('s-maxpower-dur').textContent  = 'sustained ' + fmtDur(bestDurS);
 
-  // Red Zone vulnerability bar
+  // Zone 4 (Anaerobic) vulnerability bar — visible when threshold is active
   const rzBar = document.getElementById('redzone-bar');
-  if (baseWMax > 0) {
+  if (baseFTP > 0) {
     rzBar.classList.remove('hidden');
     document.getElementById('s-redzone-dist').textContent = (redDistM / 1000).toFixed(1) + ' km';
     document.getElementById('s-redzone-pct').textContent  = Math.round(redDistFraction * 100) + '% of route';
@@ -777,17 +808,35 @@ function updateFuel() {
   document.getElementById('f-gels').textContent  = gels + (gels === 1 ? ' gel'    : ' gels');
   document.getElementById('f-iso').textContent   = iso  + (iso  === 1 ? ' bottle' : ' bottles');
 
-  // Red Zone advisory: >15 % anaerobic → suggest gel-heavy mix
+  // High-intensity nutrition advisory: Zone 3+4 triggers gel/liquid shift
+  // At threshold+ intensity, blood is diverted from the gut — solid bars become hard to digest
   const advisory = document.getElementById('zone-advisory');
-  if (baseWMax > 0 && redDistFraction > 0.15) {
-    const pct         = Math.round(redDistFraction * 100);
-    const curGelPct   = Math.round(gelPct * 100);
-    const suggestedGel = Math.min(80, Math.max(curGelPct, 60));
-    const suggestedBar = Math.max(0, 100 - suggestedGel - Math.round(isoPct * 100));
-    document.getElementById('zone-advisory-text').textContent =
-      pct + ' % of this route is anaerobic. Solid food absorption decreases above ~80 % W\u2098\u2090\u02E3 — '
-      + 'consider shifting to ~' + suggestedGel + ' % Gels / ~' + suggestedBar + ' % Bars to reduce GI risk.';
-    advisory.classList.remove('hidden');
+  if (baseFTP > 0) {
+    // Compute fraction of route in Zone 3 (threshold) + Zone 4 (anaerobic)
+    let highIntDistM = 0;
+    if (computed) {
+      for (let i = 0; i < computed.length; i++) {
+        if (computed[i].z === 'yellow' || computed[i].z === 'red') {
+          highIntDistM += (i < computed.length - 1 ? computed[i + 1].d - computed[i].d : 100);
+        }
+      }
+    }
+    const highIntFraction = totalDistM > 0 ? highIntDistM / totalDistM : 0;
+
+    if (highIntFraction > 0.15) {
+      const pct = Math.round(highIntFraction * 100);
+      const isHighlyAnaerobic = redDistFraction > 0.10;  // >10% Zone 4
+      const recGel = isHighlyAnaerobic ? 100 : Math.min(80, Math.max(Math.round(gelPct * 100), 60));
+      const recIso = isHighlyAnaerobic ? 0  : Math.round(isoPct * 100);
+      const recBar = Math.max(0, 100 - recGel - recIso);
+      const zone34label = isHighlyAnaerobic
+        ? 'Over ' + Math.round(redDistFraction * 100) + '% of the route is Zone 4 (Anaerobic). At this intensity, gastric emptying nearly stops — switch to 100% gels/liquids only.'
+        : pct + '% of the route is at Threshold or above (Zone 3–4). Blood is diverted from the gut at high intensity — recommend ~' + recGel + '% Gels / ~' + recBar + '% Bars / ~' + recIso + '% Iso to reduce GI risk.';
+      document.getElementById('zone-advisory-text').textContent = zone34label;
+      advisory.classList.remove('hidden');
+    } else {
+      advisory.classList.add('hidden');
+    }
   } else {
     advisory.classList.add('hidden');
   }
@@ -822,8 +871,8 @@ function renderChart(data) {
   const minE  = Math.min(...eles), maxE = Math.max(...eles);
   const eRng  = (maxE - minE) || 1;
 
-  // Ensure W_max ceiling fits inside the chart scale
-  const allW  = baseWMax > 0 ? [...watts, baseWMax] : watts;
+  // Ensure threshold ceiling fits inside the chart scale
+  const allW  = baseFTP > 0 ? [...watts, baseFTP] : watts;
   const maxW  = (Math.max(...allW) || 1) * 1.15;
 
   const toX  = d => pL + (d / maxD) * cW;
@@ -859,9 +908,10 @@ function renderChart(data) {
   data.forEach((r, i) => { i === 0 ? ctx.moveTo(toX(r.d), toYe(r.e)) : ctx.lineTo(toX(r.d), toYe(r.e)); });
   ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.5; ctx.stroke();
 
-  if (baseWMax > 0) {
-    // ── Zone-colored power line (segment by segment) ──────────
-    const zColor = { green: '#22c55e', yellow: '#eab308', red: '#ef4444' };
+  if (baseFTP > 0) {
+    // ── 4-zone power line (segment by segment) ────────────────
+    // Z1 blue · Z2 green · Z3 yellow · Z4 red
+    const zColor = { blue: '#3b82f6', green: '#22c55e', yellow: '#eab308', red: '#ef4444' };
     ctx.lineWidth = 2;
     for (let i = 0; i < data.length - 1; i++) {
       ctx.beginPath();
@@ -871,19 +921,19 @@ function renderChart(data) {
       ctx.stroke();
     }
 
-    // ── Altitude-adjusted W_max ceiling (dashed amber) ────────
+    // ── Altitude-adjusted threshold ceiling (dashed amber — "Shrinking Threshold") ─
     ctx.setLineDash([5, 4]);
     ctx.strokeStyle = 'rgba(251,191,36,0.65)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     data.forEach((r, i) => {
-      const y = toYw(r.wm > 0 ? r.wm : baseWMax);
+      const y = toYw(r.wm > 0 ? r.wm : baseFTP);
       i === 0 ? ctx.moveTo(toX(r.d), y) : ctx.lineTo(toX(r.d), y);
     });
     ctx.stroke();
     ctx.setLineDash([]);
   } else {
-    // ── Plain orange power line (no VO2Max set) ────────────────
+    // ── Plain orange power line (no threshold set) ─────────────
     ctx.beginPath();
     data.forEach((r, i) => { i === 0 ? ctx.moveTo(toX(r.d), toYw(r.w)) : ctx.lineTo(toX(r.d), toYw(r.w)); });
     ctx.strokeStyle = '#f97316'; ctx.lineWidth = 1.5; ctx.stroke();
@@ -913,22 +963,25 @@ function renderChart(data) {
   // Dynamic legend
   const legendEl = document.getElementById('chart-legend');
   legendEl.classList.remove('hidden');
-  if (baseWMax > 0) {
+  if (baseFTP > 0) {
     legendEl.innerHTML =
       '<span class="flex items-center gap-1.5 text-xs text-sky-400">' +
         '<span class="inline-block w-3 h-3 rounded-sm" style="background:rgba(56,189,248,0.4)"></span>Elevation' +
       '</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-blue-400">' +
+        '<span class="inline-block w-4 h-0.5 bg-blue-400 rounded"></span>Z1 Recovery' +
+      '</span>' +
       '<span class="flex items-center gap-1.5 text-xs text-green-400">' +
-        '<span class="inline-block w-4 h-0.5 bg-green-400 rounded"></span>Aerobic' +
+        '<span class="inline-block w-4 h-0.5 bg-green-400 rounded"></span>Z2 Tempo' +
       '</span>' +
       '<span class="flex items-center gap-1.5 text-xs text-yellow-400">' +
-        '<span class="inline-block w-4 h-0.5 bg-yellow-400 rounded"></span>Threshold' +
+        '<span class="inline-block w-4 h-0.5 bg-yellow-400 rounded"></span>Z3 Threshold' +
       '</span>' +
       '<span class="flex items-center gap-1.5 text-xs text-red-400">' +
-        '<span class="inline-block w-4 h-0.5 bg-red-400 rounded"></span>Anaerobic' +
+        '<span class="inline-block w-4 h-0.5 bg-red-400 rounded"></span>Z4 Anaerobic' +
       '</span>' +
       '<span class="flex items-center gap-1.5 text-xs text-amber-400/70">' +
-        '<span class="inline-block w-5 border-t border-dashed border-amber-400/70 mt-px"></span>W<sub>max</sub>' +
+        '<span class="inline-block w-5 border-t border-dashed border-amber-400/70 mt-px"></span>' + thresholdLabel +
       '</span>';
   } else {
     legendEl.innerHTML =
@@ -949,14 +1002,15 @@ window.addEventListener('resize', () => { if (computed) renderChart(computed); }
 // ════════════════════════════════════════════════════════════════
 function updateTable(data) {
   const tbody    = document.getElementById('table-body');
-  const hasZones = baseWMax > 0;
+  const hasZones = baseFTP > 0;
   tbody.innerHTML = '';
   data.slice(0, 50).forEach(r => {
     const gradClass = r.g > 6 ? 'text-red-400' : r.g < -4 ? 'text-sky-400' : 'text-gray-300';
     const zoneBadge = hasZones
-      ? { green:  '<span class="text-green-400">●</span>',
-          yellow: '<span class="text-yellow-400">●</span>',
-          red:    '<span class="text-red-400">● <span class="text-red-600 font-medium">crit</span></span>' }[r.z] ?? '—'
+      ? { blue:   '<span class="text-blue-400">● <span class="text-blue-600 font-medium">Z1</span></span>',
+          green:  '<span class="text-green-400">● <span class="text-green-600 font-medium">Z2</span></span>',
+          yellow: '<span class="text-yellow-400">● <span class="text-yellow-600 font-medium">Z3</span></span>',
+          red:    '<span class="text-red-400">● <span class="text-red-600 font-medium">Z4</span></span>' }[r.z] ?? '—'
       : '—';
     const tr = document.createElement('tr');
     tr.className = 'hover:bg-gray-800/30 transition-colors' + (r.z === 'red' && hasZones ? ' bg-red-950/10' : '');
