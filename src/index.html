@@ -267,32 +267,59 @@
 
       <!-- Summary Cards -->
       <div id="summary-section" class="hidden fade-in">
-        <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-3">
+        <!-- Row 1: Route -->
+        <div class="grid grid-cols-3 gap-3 mb-3">
           <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
             <p class="text-xs text-gray-600 mb-0.5">Distance</p>
             <p id="s-distance" class="text-base font-bold text-white">—</p>
-          </div>
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
-            <p class="text-xs text-gray-600 mb-0.5">Est. Time</p>
-            <p id="s-time" class="text-base font-bold text-white">—</p>
           </div>
           <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
             <p class="text-xs text-gray-600 mb-0.5">Elev. Gain</p>
             <p id="s-elevation" class="text-base font-bold text-white">—</p>
           </div>
           <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
-            <p class="text-xs text-gray-600 mb-0.5">Energy</p>
-            <p id="s-kcal" class="text-base font-bold text-white">—</p>
+            <p class="text-xs text-gray-600 mb-0.5">Est. Time</p>
+            <p id="s-time" class="text-base font-bold text-white">—</p>
           </div>
+        </div>
+        <!-- Row 2: Performance -->
+        <div class="grid grid-cols-3 gap-3 mb-3">
           <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
             <p class="text-xs text-gray-600 mb-0.5">Avg Power</p>
             <p id="s-power" class="text-base font-bold text-white">—</p>
+          </div>
+          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
+            <p class="text-xs text-gray-600 mb-0.5">Energy</p>
+            <p id="s-kcal" class="text-base font-bold text-white">—</p>
           </div>
           <div class="bg-gray-900 border border-orange-900/50 rounded-xl p-3">
             <p class="text-xs text-orange-700 mb-0.5">⚡ Max Power</p>
             <p id="s-maxpower" class="text-base font-bold text-orange-400">—</p>
             <p id="s-maxpower-grad" class="text-xs text-gray-600 mt-0.5">—</p>
             <p id="s-maxpower-dur" class="text-xs text-gray-600">—</p>
+          </div>
+        </div>
+        <!-- Row 3: Zone time breakdown (only when threshold active) -->
+        <div id="zone-time-row" class="hidden grid-cols-4 gap-3 mb-3">
+          <div class="bg-gray-900 border border-blue-900/40 rounded-xl p-3">
+            <p class="text-xs text-blue-700 mb-0.5">Z1 Recovery</p>
+            <p id="s-z1-time" class="text-sm font-bold text-blue-400">—</p>
+            <p id="s-z1-pct" class="text-xs text-gray-600 mt-0.5">—</p>
+          </div>
+          <div class="bg-gray-900 border border-green-900/40 rounded-xl p-3">
+            <p class="text-xs text-green-700 mb-0.5">Z2 Tempo</p>
+            <p id="s-z2-time" class="text-sm font-bold text-green-400">—</p>
+            <p id="s-z2-pct" class="text-xs text-gray-600 mt-0.5">—</p>
+          </div>
+          <div class="bg-gray-900 border border-yellow-900/40 rounded-xl p-3">
+            <p class="text-xs text-yellow-700 mb-0.5">Z3 Threshold</p>
+            <p id="s-z3-time" class="text-sm font-bold text-yellow-400">—</p>
+            <p id="s-z3-pct" class="text-xs text-gray-600 mt-0.5">—</p>
+          </div>
+          <div class="bg-gray-900 border border-red-900/40 rounded-xl p-3">
+            <p class="text-xs text-red-700 mb-0.5">Z4 Anaerobic</p>
+            <p id="s-z4-time" class="text-sm font-bold text-red-400">—</p>
+            <p id="s-z4-pct" class="text-xs text-gray-600 mt-0.5">—</p>
           </div>
         </div>
 
@@ -784,6 +811,32 @@ function updateSummary(p) {
     document.getElementById('s-redzone-pct').textContent  = Math.round(redDistFraction * 100) + '% of route';
   } else {
     rzBar.classList.add('hidden');
+  }
+
+  // Zone time breakdown
+  const zoneRow = document.getElementById('zone-time-row');
+  if (baseFTP > 0) {
+    const vMs = p.speedKmh / 3.6;
+    const zt = { blue: 0, green: 0, yellow: 0, red: 0 };
+    for (let i = 0; i < computed.length; i++) {
+      const segLen = i < computed.length - 1 ? computed[i + 1].d - computed[i].d : 100;
+      zt[computed[i].z] = (zt[computed[i].z] || 0) + (vMs > 0 ? segLen / vMs : 0);
+    }
+    const totalT = zt.blue + zt.green + zt.yellow + zt.red;
+    const fmtT = s => {
+      const hh = Math.floor(s / 3600), mm = Math.floor((s % 3600) / 60);
+      return hh > 0 ? hh + 'h ' + String(mm).padStart(2, '0') + 'm' : mm + ' min';
+    };
+    [['blue','z1'],['green','z2'],['yellow','z3'],['red','z4']].forEach(([z, id]) => {
+      const t = zt[z] || 0;
+      document.getElementById('s-' + id + '-time').textContent = fmtT(t);
+      document.getElementById('s-' + id + '-pct').textContent  = totalT > 0 ? Math.round(t / totalT * 100) + '%' : '—';
+    });
+    zoneRow.classList.remove('hidden');
+    zoneRow.classList.add('grid');
+  } else {
+    zoneRow.classList.add('hidden');
+    zoneRow.classList.remove('grid');
   }
 
   document.getElementById('summary-section').classList.remove('hidden');
