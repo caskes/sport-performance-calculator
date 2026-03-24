@@ -25,21 +25,209 @@
       <h1 class="text-base font-bold text-white tracking-tight">⚡ Sport Performance Calculator</h1>
       <p class="text-xs text-gray-500">Physiological Intelligence Engine</p>
     </div>
-    <div class="flex bg-gray-800 rounded-lg p-1 gap-1">
-      <button id="btn-cycling" onclick="setSport('cycling')"
-        class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-orange-500 text-white">
-        🚴 Cycling
-      </button>
-      <button id="btn-running" onclick="setSport('running')"
-        class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white">
-        🏃 Running
-      </button>
+    <div class="flex items-center gap-3">
+      <div class="flex bg-gray-800 rounded-lg p-1 gap-1">
+        <button id="btn-cycling" onclick="setSport('cycling')"
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-orange-500 text-white">
+          🚴 Cycling
+        </button>
+        <button id="btn-running" onclick="setSport('running')"
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white">
+          🏃 Running
+        </button>
+      </div>
+      <div class="flex bg-gray-800 rounded-lg p-1 gap-1">
+        <button id="btn-race" onclick="setView('race')"
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-gray-700 text-white">
+          📈 Race Analyzer
+        </button>
+        <button id="btn-training" onclick="setView('training')"
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white">
+          🧬 Training Hub
+        </button>
+      </div>
     </div>
   </div>
 </header>
 
 <!-- ═══════════════════ MAIN ═══════════════════ -->
 <main class="max-w-7xl mx-auto px-5 py-6">
+
+<!-- ═══════════════════ TRAINING HUB ═══════════════════ -->
+<div id="view-training" class="hidden">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+    <!-- ── Training Left Panel ── -->
+    <div class="space-y-4">
+
+      <!-- Athlete Profile -->
+      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Athlete Profile</h2>
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs text-gray-500 block mb-1">FTP (Watts)</label>
+            <input type="number" id="profile-ftp" placeholder="e.g. 250" min="50" max="600"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
+              oninput="saveProfile()">
+          </div>
+          <div>
+            <label class="text-xs text-gray-500 block mb-1">Name (optional)</label>
+            <input type="text" id="profile-name" placeholder="e.g. Camiel"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
+              oninput="saveProfile()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Events -->
+      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Upcoming Events</h2>
+        <div id="events-list" class="space-y-2 mb-3"></div>
+        <div class="space-y-2 border-t border-gray-800 pt-3">
+          <input type="text" id="ev-name" placeholder="Event name"
+            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-orange-500 focus:outline-none transition-colors">
+          <div class="flex gap-2">
+            <input type="date" id="ev-date"
+              class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-orange-500 focus:outline-none transition-colors">
+            <select id="ev-sport"
+              class="bg-gray-800 border border-gray-700 rounded-lg px-2 py-2 text-xs focus:border-orange-500 focus:outline-none transition-colors">
+              <option value="cycling">🚴 Cycling</option>
+              <option value="running">🏃 Running</option>
+            </select>
+          </div>
+          <input type="number" id="ev-dist" placeholder="Distance (km)" min="1" max="1000"
+            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-orange-500 focus:outline-none transition-colors">
+          <button onclick="addEvent()"
+            class="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium py-2 rounded-lg border border-gray-700 transition-colors">
+            + Add Event
+          </button>
+        </div>
+      </div>
+
+      <!-- iOS Shortcut Setup -->
+      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">iOS Shortcut Setup</h2>
+        <p class="text-xs text-gray-600 mb-3 leading-relaxed">
+          Sync Apple Health data daily. The Shortcut POSTs your health metrics to this Worker automatically.
+        </p>
+        <div class="bg-gray-800 rounded-lg p-2 mb-2 font-mono text-xs text-orange-300 break-all" id="webhook-url"></div>
+        <button onclick="copyWebhook()"
+          class="w-full bg-orange-500 hover:bg-orange-400 text-white text-xs font-semibold py-2 rounded-lg transition-colors mb-3">
+          📋 Copy Webhook URL
+        </button>
+        <details class="text-xs text-gray-600">
+          <summary class="cursor-pointer text-gray-500 hover:text-gray-300 transition-colors">Shortcut payload schema ▸</summary>
+          <pre class="mt-2 bg-gray-800 rounded p-2 overflow-x-auto text-gray-400 leading-relaxed">{
+  "date": "2026-03-24",
+  "weight_kg": 75.2,
+  "vo2_max": 52,
+  "hrv_ms": 48,
+  "sleep_hours": 7.5,
+  "active_energy_kcal": 650,
+  "cycling_work_kj": 320
+}</pre>
+        </details>
+      </div>
+
+    </div>
+
+    <!-- ── Training Right Panel ── -->
+    <div class="lg:col-span-2 space-y-4">
+
+      <!-- Readiness + WOD -->
+      <div id="training-empty" class="bg-gray-900 rounded-xl border border-gray-800 p-8 text-center text-gray-700">
+        <div class="text-5xl mb-3 opacity-40">🧬</div>
+        <p class="text-sm">No health data yet.</p>
+        <p class="text-xs mt-1">Set up the iOS Shortcut to start syncing Apple Health data daily.</p>
+      </div>
+
+      <div id="training-dashboard" class="hidden space-y-4">
+
+        <!-- Readiness card -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3 col-span-2 sm:col-span-1">
+            <p class="text-xs text-gray-600 mb-1">Readiness</p>
+            <p id="t-readiness" class="text-3xl font-bold text-white">—</p>
+            <p id="t-readiness-label" class="text-xs text-gray-500 mt-0.5">—</p>
+          </div>
+          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
+            <p class="text-xs text-gray-600 mb-1">Fitness (CTL)</p>
+            <p id="t-ctl" class="text-2xl font-bold text-blue-400">—</p>
+            <p class="text-xs text-gray-600 mt-0.5">42-day load</p>
+          </div>
+          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
+            <p class="text-xs text-gray-600 mb-1">Fatigue (ATL)</p>
+            <p id="t-atl" class="text-2xl font-bold text-orange-400">—</p>
+            <p class="text-xs text-gray-600 mt-0.5">7-day load</p>
+          </div>
+          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
+            <p class="text-xs text-gray-600 mb-1">Form (TSB)</p>
+            <p id="t-tsb" class="text-2xl font-bold text-white">—</p>
+            <p class="text-xs text-gray-600 mt-0.5">CTL − ATL</p>
+          </div>
+        </div>
+
+        <!-- Burnout alert -->
+        <div id="burnout-alert" class="hidden bg-red-950/30 border border-red-900/40 rounded-xl p-3">
+          <p class="text-xs font-semibold text-red-400">🔥 High Burnout Risk</p>
+          <p class="text-xs text-gray-500 mt-0.5">Acute load (ATL) exceeds fitness (CTL) by &gt;20%. Insert 2–3 recovery days.</p>
+        </div>
+
+        <!-- Workout of the Day -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Workout of the Day</h3>
+          <div class="flex items-start gap-4">
+            <div class="flex-1">
+              <p id="wod-label" class="text-base font-bold text-white mb-1">—</p>
+              <p id="wod-desc" class="text-xs text-gray-500 leading-relaxed">—</p>
+            </div>
+            <div class="text-right shrink-0 space-y-1">
+              <p id="wod-zone" class="text-xs font-semibold text-orange-400">—</p>
+              <p id="wod-duration" class="text-xs text-gray-500">—</p>
+              <p id="wod-intensity" class="text-xs text-gray-500">—</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TSS Sparkline -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Training Load — Last 90 Days</h3>
+          <canvas id="tss-chart" class="w-full rounded-lg" style="height:160px"></canvas>
+        </div>
+
+        <!-- Advisory notes -->
+        <div id="advisory-section" class="hidden bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Event & Load Advisory</h3>
+          <ul id="advisory-list" class="space-y-1.5 text-xs text-gray-400 leading-relaxed"></ul>
+        </div>
+
+        <!-- Recent metrics table -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Recent Health Metrics</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="text-gray-600 border-b border-gray-800">
+                  <th class="text-left py-2 pr-3 font-medium">Date</th>
+                  <th class="text-right py-2 pr-3 font-medium">HRV</th>
+                  <th class="text-right py-2 pr-3 font-medium">Sleep</th>
+                  <th class="text-right py-2 pr-3 font-medium">Weight</th>
+                  <th class="text-right py-2 pr-3 font-medium">VO₂</th>
+                  <th class="text-right py-2 font-medium">TSS</th>
+                </tr>
+              </thead>
+              <tbody id="metrics-table" class="divide-y divide-gray-800/50"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ RACE ANALYZER ═══════════════════ -->
+<div id="view-race">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
     <!-- ══ LEFT PANEL ══ -->
@@ -402,6 +590,7 @@
 
     </div>
   </div>
+</div><!-- end view-race -->
 </main>
 
 <script>
@@ -1120,6 +1309,250 @@ function exportCSV() {
     download: 'sport-performance.csv',
   });
   a.click();
+}
+
+// ════════════════════════════════════════════════════════════════
+// VIEW TOGGLE  (Race Analyzer ↔ Training Hub)
+// ════════════════════════════════════════════════════════════════
+function setView(v) {
+  const isTraining = v === 'training';
+  document.getElementById('view-race').classList.toggle('hidden', isTraining);
+  document.getElementById('view-training').classList.toggle('hidden', !isTraining);
+  const activeClass = 'px-3 py-1 rounded-md text-xs font-semibold transition-all bg-gray-700 text-white';
+  const idleClass   = 'px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white';
+  document.getElementById('btn-race').className     = !isTraining ? activeClass : idleClass;
+  document.getElementById('btn-training').className =  isTraining ? activeClass : idleClass;
+  if (isTraining) loadDashboard();
+}
+
+// ════════════════════════════════════════════════════════════════
+// TRAINING HUB
+// ════════════════════════════════════════════════════════════════
+
+// Set the webhook URL on load
+(function () {
+  const el = document.getElementById('webhook-url');
+  if (el) el.textContent = window.location.origin + '/api/sync-health';
+})();
+
+function copyWebhook() {
+  const url = window.location.origin + '/api/sync-health';
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = event.target;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = '📋 Copy Webhook URL'; }, 2000);
+  });
+}
+
+async function saveProfile() {
+  const ftp  = parseInt(document.getElementById('profile-ftp').value) || 0;
+  const name = document.getElementById('profile-name').value;
+  if (!ftp && !name) return;
+  await fetch('/api/athlete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ftp: ftp || undefined, name: name || undefined }),
+  });
+}
+
+async function addEvent() {
+  const name  = document.getElementById('ev-name').value.trim();
+  const date  = document.getElementById('ev-date').value;
+  const sport = document.getElementById('ev-sport').value;
+  const dist  = parseFloat(document.getElementById('ev-dist').value) || 0;
+  if (!name || !date) return;
+  await fetch('/api/events', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: Date.now().toString(), name, date, sport, distance_km: dist }),
+  });
+  document.getElementById('ev-name').value = '';
+  document.getElementById('ev-date').value = '';
+  document.getElementById('ev-dist').value = '';
+  loadDashboard();
+}
+
+async function deleteEvent(id) {
+  await fetch('/api/events/' + id, { method: 'DELETE' });
+  loadDashboard();
+}
+
+async function loadDashboard() {
+  let data;
+  try {
+    const res = await fetch('/api/dashboard');
+    data = await res.json();
+  } catch { return; }
+
+  renderEventsList(data.events ?? []);
+
+  if (!data.state) {
+    document.getElementById('training-empty').classList.remove('hidden');
+    document.getElementById('training-dashboard').classList.add('hidden');
+    return;
+  }
+
+  document.getElementById('training-empty').classList.add('hidden');
+  document.getElementById('training-dashboard').classList.remove('hidden');
+
+  const s = data.state;
+
+  // Readiness
+  const rpct = s.readiness_pct;
+  const rColor = rpct >= 80 ? 'text-green-400' : rpct >= 60 ? 'text-yellow-400' : 'text-red-400';
+  const rLabel = rpct >= 80 ? 'High — go for it' : rpct >= 60 ? 'Moderate — train smart' : 'Low — recover first';
+  document.getElementById('t-readiness').className = 'text-3xl font-bold ' + rColor;
+  document.getElementById('t-readiness').textContent = rpct + '%';
+  document.getElementById('t-readiness-label').textContent = rLabel;
+
+  // CTL / ATL / TSB
+  document.getElementById('t-ctl').textContent = s.ctl.toFixed(1);
+  document.getElementById('t-atl').textContent = s.atl.toFixed(1);
+  const tsbEl = document.getElementById('t-tsb');
+  tsbEl.textContent = (s.tsb > 0 ? '+' : '') + s.tsb;
+  tsbEl.className = 'text-2xl font-bold ' + (s.tsb > 0 ? 'text-green-400' : s.tsb < -20 ? 'text-red-400' : 'text-yellow-400');
+
+  // Burnout
+  document.getElementById('burnout-alert').classList.toggle('hidden', !s.burnout_risk);
+
+  // WOD
+  const wod = s.wod;
+  document.getElementById('wod-label').textContent     = wod.label;
+  document.getElementById('wod-desc').textContent      = wod.description;
+  document.getElementById('wod-zone').textContent      = 'Target: ' + wod.target_zone;
+  document.getElementById('wod-duration').textContent  = wod.duration_min + ' min';
+  document.getElementById('wod-intensity').textContent = wod.intensity_pct + '% of threshold';
+
+  // Advisory
+  const advisory = data.advisory ?? [];
+  const advSec = document.getElementById('advisory-section');
+  if (advisory.length > 0) {
+    advSec.classList.remove('hidden');
+    document.getElementById('advisory-list').innerHTML =
+      advisory.map(n => '<li>' + n + '</li>').join('');
+  } else {
+    advSec.classList.add('hidden');
+  }
+
+  // Recent metrics table
+  const tbody = document.getElementById('metrics-table');
+  tbody.innerHTML = '';
+  (data.metrics ?? []).slice(-14).reverse().forEach(m => {
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-800/30 transition-colors';
+    tr.innerHTML =
+      '<td class="py-1.5 pr-3 text-gray-500">'            + m.date + '</td>' +
+      '<td class="py-1.5 pr-3 text-right text-blue-300">' + (m.hrv_ms    ? m.hrv_ms + ' ms' : '—') + '</td>' +
+      '<td class="py-1.5 pr-3 text-right text-gray-300">' + (m.sleep_hours ? m.sleep_hours + 'h' : '—') + '</td>' +
+      '<td class="py-1.5 pr-3 text-right text-gray-300">' + (m.weight_kg  ? m.weight_kg + ' kg' : '—') + '</td>' +
+      '<td class="py-1.5 pr-3 text-right text-green-300">'+ (m.vo2_max   ? m.vo2_max : '—') + '</td>' +
+      '<td class="py-1.5 text-right text-orange-300">'    + (m.tss       ? m.tss : '—') + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  // TSS sparkline
+  renderTSSChart(data.metrics ?? [], s);
+}
+
+function renderEventsList(events) {
+  const el = document.getElementById('events-list');
+  if (events.length === 0) {
+    el.innerHTML = '<p class="text-xs text-gray-700">No events added yet.</p>';
+    return;
+  }
+  const now = new Date();
+  el.innerHTML = events.map(ev => {
+    const days = Math.round((new Date(ev.date).getTime() - now.getTime()) / 86400000);
+    const daysLabel = days < 0 ? 'Past' : days === 0 ? 'Today!' : days + 'd away';
+    const icon = ev.sport === 'cycling' ? '🚴' : '🏃';
+    return '<div class="flex items-center justify-between bg-gray-800 rounded-lg px-3 py-2">' +
+      '<div>' +
+        '<p class="text-xs font-medium text-white">' + icon + ' ' + ev.name + '</p>' +
+        '<p class="text-xs text-gray-600">' + ev.date + (ev.distance_km ? ' · ' + ev.distance_km + ' km' : '') + '</p>' +
+      '</div>' +
+      '<div class="flex items-center gap-2">' +
+        '<span class="text-xs text-orange-400 font-mono">' + daysLabel + '</span>' +
+        '<button onclick="deleteEvent(\'' + ev.id + '\')" class="text-gray-700 hover:text-red-400 transition-colors text-xs">✕</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderTSSChart(metrics, state) {
+  const canvas = document.getElementById('tss-chart');
+  if (!canvas || metrics.length === 0) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth - 32;
+  const H = 160;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pL = 40, pR = 16, pT = 10, pB = 28;
+  const cW = W - pL - pR, cH = H - pT - pB;
+
+  const tssList = metrics.map(m => m.tss || 0);
+  const maxTSS  = Math.max(...tssList, 1) * 1.2;
+  const n = metrics.length;
+
+  ctx.fillStyle = '#111827';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid
+  ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pT + cH * i / 4;
+    ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(pL + cW, y); ctx.stroke();
+  }
+
+  const toX = i => pL + (i / Math.max(n - 1, 1)) * cW;
+  const toY = v => pT + cH - (v / maxTSS) * cH;
+
+  // TSS bars
+  const barW = Math.max(2, cW / n - 1);
+  tssList.forEach((v, i) => {
+    ctx.fillStyle = v > 100 ? '#f97316' : v > 60 ? '#eab308' : '#3b82f6';
+    ctx.fillRect(toX(i) - barW / 2, toY(v), barW, pT + cH - toY(v));
+  });
+
+  // CTL line (recompute incrementally for chart)
+  const k42 = 2 / 43;
+  let ctl = tssList[0] || 0;
+  const ctlLine = tssList.map(v => { ctl = v * k42 + ctl * (1 - k42); return ctl; });
+  ctx.beginPath();
+  ctlLine.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
+  ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.stroke();
+
+  // ATL line
+  const k7 = 2 / 8;
+  let atl = tssList[0] || 0;
+  const atlLine = tssList.map(v => { atl = v * k7 + atl * (1 - k7); return atl; });
+  ctx.beginPath();
+  atlLine.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
+  ctx.strokeStyle = '#fb923c'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // X labels (first + every ~30 days)
+  ctx.fillStyle = '#4b5563'; ctx.font = '9px system-ui'; ctx.textAlign = 'center';
+  metrics.forEach((m, i) => {
+    if (i === 0 || i === n - 1 || i % 30 === 0) {
+      ctx.fillText(m.date.slice(5), toX(i), H - pB + 12);
+    }
+  });
+
+  // Y axis
+  ctx.textAlign = 'right'; ctx.fillStyle = '#4b5563';
+  for (let i = 0; i <= 4; i++) {
+    const v = maxTSS * i / 4;
+    ctx.fillText(Math.round(v), pL - 4, toY(v) + 3);
+  }
+
+  // Legend
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#60a5fa'; ctx.fillText('CTL', pL + 4, pT + 12);
+  ctx.fillStyle = '#fb923c'; ctx.fillText('ATL', pL + 30, pT + 12);
 }
 </script>
 </body>

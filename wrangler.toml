@@ -8,3 +8,7 @@ globs = ["**/*.html"]
 
 [vars]
 APP_NAME = "Sport Performance Calculator"
+
+[[kv_namespaces]]
+binding = "ATHLETE_KV"
+id = "995fa4e894de4a44bfee75cdbdb97f0a"
