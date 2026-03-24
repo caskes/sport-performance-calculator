@@ -250,6 +250,7 @@
             <p class="text-xs text-orange-700 mb-0.5">⚡ Max Power</p>
             <p id="s-maxpower" class="text-base font-bold text-orange-400">—</p>
             <p id="s-maxpower-grad" class="text-xs text-gray-600 mt-0.5">—</p>
+            <p id="s-maxpower-dur" class="text-xs text-gray-600">—</p>
           </div>
         </div>
 
@@ -554,13 +555,35 @@ function updateSummary(p) {
   const maxW   = maxRow?.w ?? 0;
   const maxG   = maxRow?.g ?? 0;  // gradient % at that segment
 
-  document.getElementById('s-distance').textContent  = distKm.toFixed(1) + ' km';
-  document.getElementById('s-time').textContent      = hh + 'h ' + String(mm).padStart(2,'0') + 'm';
-  document.getElementById('s-elevation').textContent = Math.round(elevGain) + ' m';
-  document.getElementById('s-kcal').textContent      = Math.round(last?.k ?? 0) + ' kcal';
-  document.getElementById('s-power').textContent     = Math.round(avgW) + ' W';
-  document.getElementById('s-maxpower').textContent  = Math.round(maxW) + ' W';
+  // Sustained duration: longest consecutive run of segments at ≥ 90% of peak watts
+  const threshold = maxW * 0.9;
+  const vMs = p.speedKmh / 3.6;
+  let bestDurS = 0, curDurS = 0;
+  for (let i = 0; i < computed.length; i++) {
+    const segLen = i < computed.length - 1 ? computed[i + 1].d - computed[i].d : 100;
+    if (computed[i].w >= threshold) {
+      curDurS += vMs > 0 ? segLen / vMs : 0;
+    } else {
+      if (curDurS > bestDurS) bestDurS = curDurS;
+      curDurS = 0;
+    }
+  }
+  if (curDurS > bestDurS) bestDurS = curDurS;
+
+  function fmtDur(s) {
+    if (s < 60) return '~' + Math.round(s) + ' s';
+    const m = Math.floor(s / 60), sec = Math.round(s % 60);
+    return '~' + m + 'm' + (sec > 0 ? ' ' + sec + 's' : '');
+  }
+
+  document.getElementById('s-distance').textContent      = distKm.toFixed(1) + ' km';
+  document.getElementById('s-time').textContent          = hh + 'h ' + String(mm).padStart(2,'0') + 'm';
+  document.getElementById('s-elevation').textContent     = Math.round(elevGain) + ' m';
+  document.getElementById('s-kcal').textContent          = Math.round(last?.k ?? 0) + ' kcal';
+  document.getElementById('s-power').textContent         = Math.round(avgW) + ' W';
+  document.getElementById('s-maxpower').textContent      = Math.round(maxW) + ' W';
   document.getElementById('s-maxpower-grad').textContent = 'at ' + maxG.toFixed(1) + '% grade';
+  document.getElementById('s-maxpower-dur').textContent  = 'sustained ' + fmtDur(bestDurS);
   document.getElementById('summary-section').classList.remove('hidden');
 }
 
