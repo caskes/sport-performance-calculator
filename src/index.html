@@ -1336,27 +1336,37 @@ async function deleteEvent(id) {
 }
 
 async function openEventInRaceAnalyzer(eventId, eventName, eventSport) {
+  // Switch view and sport first so the canvas is visible before we render
+  setView('race');
+  if (eventSport !== sport) {
+    // setSport would call recalculate() if rawIntervals is set — delay that by clearing first
+    rawIntervals = null;
+    setSport(eventSport);
+  }
+
+  // Show loading state in file label area
+  selectedFile = { name: eventName };
+  const disp = document.getElementById('filename-display');
+  disp.textContent = 'Loading route for ' + eventName + '…';
+  disp.classList.remove('hidden');
+  document.getElementById('process-btn').disabled = true;
+
   const res = await fetch('/api/events/' + eventId + '/gpx');
-  if (!res.ok) { alert('No GPX data attached to this event.'); return; }
+  if (!res.ok) {
+    disp.textContent = 'No GPX data found for this event.';
+    return;
+  }
   const json = await res.json();
+
   rawIntervals = json.intervals;
   computed = null;
   totalDistM = 0; totalHours = 0; baseWMax = 0; baseFTP = 0; redDistFraction = 0;
 
-  // Switch sport if needed
-  if (eventSport !== sport) setSport(eventSport);
-
-  // Show file source label
-  selectedFile = { name: eventName }; // mock so process-btn stays enabled
-  const disp = document.getElementById('filename-display');
   disp.textContent = '✓ ' + eventName + ' (from event)';
-  disp.classList.remove('hidden');
   const srcLabel = document.getElementById('event-source-label');
-  if (srcLabel) { srcLabel.textContent = 'Route loaded from event: ' + eventName; srcLabel.classList.remove('hidden'); }
+  if (srcLabel) { srcLabel.textContent = 'Route: ' + eventName; srcLabel.classList.remove('hidden'); }
   document.getElementById('process-btn').disabled = false;
 
-  // Switch to Race Analyzer and calculate
-  setView('race');
   recalculate();
 }
 
@@ -1443,8 +1453,8 @@ function renderEventsList(events) {
       '</div>' +
       '<div class="flex items-center gap-2 ml-2 shrink-0">' +
         '<span class="text-xs font-mono font-semibold ' + daysColor + '">' + daysLabel + '</span>' +
-        '<button onclick="openEventInRaceAnalyzer(\'' + ev.id + '\',\'' + ev.name.replace(/'/g, "\\'") + '\',\'' + ev.sport + '\')" ' +
-          'class="text-xs text-brand-accent hover:text-brand-hover transition-colors font-medium" title="Open in Race Analyzer">→</button>' +
+        (ev.has_gpx ? '<button onclick="openEventInRaceAnalyzer(\'' + ev.id + '\',\'' + ev.name.replace(/'/g, "\\'") + '\',\'' + ev.sport + '\')" ' +
+          'class="text-xs text-brand-accent hover:text-brand-hover transition-colors font-medium" title="Analyze route in Race Analyzer">→</button>' : '') +
         '<button onclick="deleteEvent(\'' + ev.id + '\')" class="text-brand-muted hover:text-red-500 transition-colors text-xs">✕</button>' +
       '</div>' +
     '</div>';

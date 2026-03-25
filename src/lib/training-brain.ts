@@ -38,6 +38,7 @@ export interface UpcomingEvent {
   date: string;           // ISO date
   sport: 'cycling' | 'running';
   distance_km: number;
+  has_gpx?: boolean;
 }
 
 // ── TSS estimation ─────────────────────────────────────────────────────────────

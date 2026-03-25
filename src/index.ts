@@ -144,13 +144,19 @@ app.delete('/api/events/:id', async (c) => {
 app.post('/api/events/:id/gpx', async (c) => {
   const id = c.req.param('id');
   const events = await loadEvents(c.env.ATHLETE_KV);
-  if (!events.find(e => e.id === id)) return c.json({ error: 'Event not found' }, 404);
+  const idx = events.findIndex(e => e.id === id);
+  if (idx < 0) return c.json({ error: 'Event not found' }, 404);
 
   const body = await c.req.json<{ intervals: unknown[] }>();
   if (!body.intervals || !Array.isArray(body.intervals)) {
     return c.json({ error: 'intervals array required' }, 400);
   }
   await c.env.ATHLETE_KV.put(`event-gpx:${id}`, JSON.stringify(body.intervals));
+
+  // Mark event as having a GPX so the UI can show the open-in-analyzer button
+  events[idx] = { ...events[idx], has_gpx: true };
+  await c.env.ATHLETE_KV.put('events', JSON.stringify(events));
+
   return c.json({ ok: true, count: body.intervals.length });
 });
 
