@@ -4,121 +4,164 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sport Performance Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg:        '#FAFAFA',
+              surface:   '#E8DFD0',
+              primary:   '#2D3436',
+              accent:    '#3D8B6E',
+              hover:     '#2E6B56',
+              highlight: '#E8C547',
+              muted:     '#7B8B8C',
+              border:    '#D8CCBE',
+            }
+          },
+          fontFamily: {
+            display: ['Space Grotesk', 'system-ui', 'sans-serif'],
+            body:    ['DM Sans', 'system-ui', 'sans-serif'],
+            mono:    ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    input[type="range"] { accent-color: #f97316; cursor: pointer; }
-    input[type="radio"]  { accent-color: #f97316; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; }
+    h1,h2,h3,h4 { font-family: 'Space Grotesk', system-ui, sans-serif; }
+    input[type="range"]  { accent-color: #3D8B6E; cursor: pointer; }
+    input[type="radio"]  { accent-color: #3D8B6E; }
+    input[type="checkbox"] { accent-color: #3D8B6E; }
     .fade-in { animation: fadeIn 0.35s ease both; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-    .drop-active { border-color: #f97316 !important; background-color: rgba(249,115,22,0.05); }
+    .drop-active { border-color: #3D8B6E !important; background-color: rgba(61,139,110,0.05); }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #111827; }
-    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+    ::-webkit-scrollbar-track { background: #E8DFD0; }
+    ::-webkit-scrollbar-thumb { background: #D8CCBE; border-radius: 3px; }
+    details summary { list-style: none; }
+    details summary::-webkit-details-marker { display: none; }
   </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen">
+<body class="bg-brand-bg text-brand-primary min-h-screen">
 
 <!-- ═══════════════════ HEADER ═══════════════════ -->
-<header class="border-b border-gray-800 bg-gray-900 sticky top-0 z-10">
+<header class="border-b border-brand-border bg-white sticky top-0 z-10 shadow-sm">
   <div class="max-w-7xl mx-auto px-5 py-3 flex items-center justify-between">
     <div>
-      <h1 class="text-base font-bold text-white tracking-tight">⚡ Sport Performance Calculator</h1>
-      <p class="text-xs text-gray-500">Physiological Intelligence Engine</p>
+      <h1 class="text-base font-bold text-brand-primary tracking-tight">⚡ Sport Performance Calculator</h1>
+      <p class="text-xs text-brand-muted">Physiological Intelligence Engine</p>
     </div>
     <div class="flex items-center gap-3">
-      <div class="flex bg-gray-800 rounded-lg p-1 gap-1">
+      <!-- Sport selector -->
+      <div class="flex bg-brand-surface rounded-lg p-1 gap-1">
         <button id="btn-cycling" onclick="setSport('cycling')"
-          class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-orange-500 text-white">
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-brand-accent text-white">
           🚴 Cycling
         </button>
         <button id="btn-running" onclick="setSport('running')"
-          class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white">
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary">
           🏃 Running
         </button>
       </div>
-      <div class="flex bg-gray-800 rounded-lg p-1 gap-1">
-        <button id="btn-race" onclick="setView('race')"
-          class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-gray-700 text-white">
-          📈 Race Analyzer
-        </button>
+      <!-- View selector — Training Hub first -->
+      <div class="flex bg-brand-surface rounded-lg p-1 gap-1">
         <button id="btn-training" onclick="setView('training')"
-          class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white">
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary">
           🧬 Training Hub
+        </button>
+        <button id="btn-race" onclick="setView('race')"
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-brand-primary text-white">
+          📈 Race Analyzer
         </button>
       </div>
     </div>
   </div>
 </header>
 
-<!-- ═══════════════════ MAIN ═══════════════════ -->
 <main class="max-w-7xl mx-auto px-5 py-6">
 
-<!-- ═══════════════════ TRAINING HUB ═══════════════════ -->
+<!-- ═══════ TRAINING HUB ═══════ -->
 <div id="view-training" class="hidden">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-    <!-- ── Training Left Panel ── -->
+    <!-- ── Left ── -->
     <div class="space-y-4">
 
       <!-- Athlete Profile -->
-      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
-        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Athlete Profile</h2>
+      <div class="bg-white rounded-xl border border-brand-border p-4 shadow-sm">
+        <h2 class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-3 font-display">Athlete Profile</h2>
         <div class="space-y-3">
           <div>
-            <label class="text-xs text-gray-500 block mb-1">FTP (Watts)</label>
+            <label class="text-xs text-brand-muted block mb-1">FTP (Watts)</label>
             <input type="number" id="profile-ftp" placeholder="e.g. 250" min="50" max="600"
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
-              oninput="saveProfile()">
+              class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-sm focus:border-brand-accent focus:outline-none transition-colors text-brand-primary placeholder-brand-muted">
           </div>
           <div>
-            <label class="text-xs text-gray-500 block mb-1">Name (optional)</label>
+            <label class="text-xs text-brand-muted block mb-1">Name (optional)</label>
             <input type="text" id="profile-name" placeholder="e.g. Camiel"
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
-              oninput="saveProfile()">
+              class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-sm focus:border-brand-accent focus:outline-none transition-colors text-brand-primary placeholder-brand-muted">
           </div>
+          <button onclick="saveProfile()"
+            class="w-full bg-brand-accent hover:bg-brand-hover text-white text-xs font-semibold py-2 rounded-lg transition-colors">
+            Save Profile
+          </button>
         </div>
       </div>
 
-      <!-- Events -->
-      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
-        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Upcoming Events</h2>
+      <!-- Upcoming Events -->
+      <div class="bg-white rounded-xl border border-brand-border p-4 shadow-sm">
+        <h2 class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-3 font-display">Upcoming Events</h2>
         <div id="events-list" class="space-y-2 mb-3"></div>
-        <div class="space-y-2 border-t border-gray-800 pt-3">
+        <div class="space-y-2 border-t border-brand-border pt-3">
           <input type="text" id="ev-name" placeholder="Event name"
-            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-orange-500 focus:outline-none transition-colors">
+            class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-xs focus:border-brand-accent focus:outline-none transition-colors text-brand-primary placeholder-brand-muted">
           <div class="flex gap-2">
             <input type="date" id="ev-date"
-              class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-orange-500 focus:outline-none transition-colors">
+              class="flex-1 bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-xs focus:border-brand-accent focus:outline-none transition-colors text-brand-primary">
             <select id="ev-sport"
-              class="bg-gray-800 border border-gray-700 rounded-lg px-2 py-2 text-xs focus:border-orange-500 focus:outline-none transition-colors">
+              class="bg-brand-bg border border-brand-border rounded-lg px-2 py-2 text-xs focus:border-brand-accent focus:outline-none transition-colors text-brand-primary">
               <option value="cycling">🚴 Cycling</option>
               <option value="running">🏃 Running</option>
             </select>
           </div>
           <input type="number" id="ev-dist" placeholder="Distance (km)" min="1" max="1000"
-            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-orange-500 focus:outline-none transition-colors">
+            class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-xs focus:border-brand-accent focus:outline-none transition-colors text-brand-primary placeholder-brand-muted">
+          <!-- GPX file for this event -->
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Attach GPX / KML route (optional)</label>
+            <input type="file" id="ev-gpx" accept=".gpx,.kml"
+              class="w-full text-xs text-brand-muted file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-brand-surface file:text-brand-primary hover:file:bg-brand-border cursor-pointer">
+          </div>
           <button onclick="addEvent()"
-            class="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium py-2 rounded-lg border border-gray-700 transition-colors">
+            class="w-full bg-brand-accent hover:bg-brand-hover text-white text-xs font-semibold py-2 rounded-lg transition-colors">
             + Add Event
           </button>
+          <p id="ev-status" class="text-xs text-brand-accent hidden"></p>
         </div>
       </div>
 
       <!-- iOS Shortcut Setup -->
-      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
-        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">iOS Shortcut Setup</h2>
-        <p class="text-xs text-gray-600 mb-3 leading-relaxed">
-          Sync Apple Health data daily. The Shortcut POSTs your health metrics to this Worker automatically.
+      <div class="bg-white rounded-xl border border-brand-border p-4 shadow-sm">
+        <h2 class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-3 font-display">iOS Shortcut Setup</h2>
+        <p class="text-xs text-brand-muted mb-3 leading-relaxed">
+          Sync Apple Health data daily via an iOS Shortcut that POSTs your metrics automatically.
         </p>
-        <div class="bg-gray-800 rounded-lg p-2 mb-2 font-mono text-xs text-orange-300 break-all" id="webhook-url"></div>
+        <div class="bg-brand-surface rounded-lg p-2 mb-2 font-mono text-xs text-brand-accent break-all" id="webhook-url"></div>
         <button onclick="copyWebhook()"
-          class="w-full bg-orange-500 hover:bg-orange-400 text-white text-xs font-semibold py-2 rounded-lg transition-colors mb-3">
+          class="w-full bg-brand-accent hover:bg-brand-hover text-white text-xs font-semibold py-2 rounded-lg transition-colors mb-3">
           📋 Copy Webhook URL
         </button>
-        <details class="text-xs text-gray-600">
-          <summary class="cursor-pointer text-gray-500 hover:text-gray-300 transition-colors">Shortcut payload schema ▸</summary>
-          <pre class="mt-2 bg-gray-800 rounded p-2 overflow-x-auto text-gray-400 leading-relaxed">{
-  "date": "2026-03-24",
+        <details class="text-xs text-brand-muted">
+          <summary class="cursor-pointer text-brand-muted hover:text-brand-primary transition-colors select-none">Shortcut payload schema ▸</summary>
+          <pre class="mt-2 bg-brand-surface rounded p-2 overflow-x-auto text-brand-muted leading-relaxed font-mono text-xs">{
+  "date": "2026-03-25",
   "weight_kg": 75.2,
   "vo2_max": 52,
   "hrv_ms": 48,
@@ -131,83 +174,82 @@
 
     </div>
 
-    <!-- ── Training Right Panel ── -->
+    <!-- ── Right ── -->
     <div class="lg:col-span-2 space-y-4">
 
-      <!-- Readiness + WOD -->
-      <div id="training-empty" class="bg-gray-900 rounded-xl border border-gray-800 p-8 text-center text-gray-700">
-        <div class="text-5xl mb-3 opacity-40">🧬</div>
-        <p class="text-sm">No health data yet.</p>
-        <p class="text-xs mt-1">Set up the iOS Shortcut to start syncing Apple Health data daily.</p>
+      <div id="training-empty" class="bg-white rounded-xl border border-brand-border p-8 text-center shadow-sm">
+        <div class="text-5xl mb-3 opacity-30">🧬</div>
+        <p class="text-sm text-brand-primary font-medium">No health data yet.</p>
+        <p class="text-xs text-brand-muted mt-1">Set up the iOS Shortcut to start syncing Apple Health data daily.</p>
       </div>
 
       <div id="training-dashboard" class="hidden space-y-4">
 
-        <!-- Readiness card -->
+        <!-- Readiness + CTL/ATL/TSB -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3 col-span-2 sm:col-span-1">
-            <p class="text-xs text-gray-600 mb-1">Readiness</p>
-            <p id="t-readiness" class="text-3xl font-bold text-white">—</p>
-            <p id="t-readiness-label" class="text-xs text-gray-500 mt-0.5">—</p>
+          <div class="bg-white border border-brand-border rounded-xl p-3 shadow-sm col-span-2 sm:col-span-1">
+            <p class="text-xs text-brand-muted mb-1">Readiness</p>
+            <p id="t-readiness" class="text-3xl font-bold text-brand-primary">—</p>
+            <p id="t-readiness-label" class="text-xs text-brand-muted mt-0.5">—</p>
           </div>
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
-            <p class="text-xs text-gray-600 mb-1">Fitness (CTL)</p>
-            <p id="t-ctl" class="text-2xl font-bold text-blue-400">—</p>
-            <p class="text-xs text-gray-600 mt-0.5">42-day load</p>
+          <div class="bg-white border border-brand-border rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-brand-muted mb-1">Fitness (CTL)</p>
+            <p id="t-ctl" class="text-2xl font-bold text-blue-600">—</p>
+            <p class="text-xs text-brand-muted mt-0.5">42-day load</p>
           </div>
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
-            <p class="text-xs text-gray-600 mb-1">Fatigue (ATL)</p>
-            <p id="t-atl" class="text-2xl font-bold text-orange-400">—</p>
-            <p class="text-xs text-gray-600 mt-0.5">7-day load</p>
+          <div class="bg-white border border-brand-border rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-brand-muted mb-1">Fatigue (ATL)</p>
+            <p id="t-atl" class="text-2xl font-bold text-orange-500">—</p>
+            <p class="text-xs text-brand-muted mt-0.5">7-day load</p>
           </div>
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
-            <p class="text-xs text-gray-600 mb-1">Form (TSB)</p>
-            <p id="t-tsb" class="text-2xl font-bold text-white">—</p>
-            <p class="text-xs text-gray-600 mt-0.5">CTL − ATL</p>
+          <div class="bg-white border border-brand-border rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-brand-muted mb-1">Form (TSB)</p>
+            <p id="t-tsb" class="text-2xl font-bold text-brand-primary">—</p>
+            <p class="text-xs text-brand-muted mt-0.5">CTL − ATL</p>
           </div>
         </div>
 
         <!-- Burnout alert -->
-        <div id="burnout-alert" class="hidden bg-red-950/30 border border-red-900/40 rounded-xl p-3">
-          <p class="text-xs font-semibold text-red-400">🔥 High Burnout Risk</p>
-          <p class="text-xs text-gray-500 mt-0.5">Acute load (ATL) exceeds fitness (CTL) by &gt;20%. Insert 2–3 recovery days.</p>
+        <div id="burnout-alert" class="hidden bg-red-50 border border-red-200 rounded-xl p-3">
+          <p class="text-xs font-semibold text-red-600">🔥 High Burnout Risk</p>
+          <p class="text-xs text-red-500 mt-0.5">Acute load (ATL) exceeds fitness (CTL) by &gt;20%. Insert 2–3 recovery days.</p>
         </div>
 
-        <!-- Workout of the Day -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Workout of the Day</h3>
+        <!-- WOD -->
+        <div class="bg-white border border-brand-border rounded-xl p-4 shadow-sm">
+          <h3 class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-3 font-display">Workout of the Day</h3>
           <div class="flex items-start gap-4">
             <div class="flex-1">
-              <p id="wod-label" class="text-base font-bold text-white mb-1">—</p>
-              <p id="wod-desc" class="text-xs text-gray-500 leading-relaxed">—</p>
+              <p id="wod-label" class="text-base font-bold text-brand-primary mb-1">—</p>
+              <p id="wod-desc" class="text-xs text-brand-muted leading-relaxed">—</p>
             </div>
             <div class="text-right shrink-0 space-y-1">
-              <p id="wod-zone" class="text-xs font-semibold text-orange-400">—</p>
-              <p id="wod-duration" class="text-xs text-gray-500">—</p>
-              <p id="wod-intensity" class="text-xs text-gray-500">—</p>
+              <p id="wod-zone" class="text-xs font-semibold text-brand-accent">—</p>
+              <p id="wod-duration" class="text-xs text-brand-muted">—</p>
+              <p id="wod-intensity" class="text-xs text-brand-muted">—</p>
             </div>
           </div>
         </div>
 
         <!-- TSS Sparkline -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Training Load — Last 90 Days</h3>
+        <div class="bg-white border border-brand-border rounded-xl p-4 shadow-sm">
+          <h3 class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-3 font-display">Training Load — Last 90 Days</h3>
           <canvas id="tss-chart" class="w-full rounded-lg" style="height:160px"></canvas>
         </div>
 
-        <!-- Advisory notes -->
-        <div id="advisory-section" class="hidden bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Event & Load Advisory</h3>
-          <ul id="advisory-list" class="space-y-1.5 text-xs text-gray-400 leading-relaxed"></ul>
+        <!-- Advisory -->
+        <div id="advisory-section" class="hidden bg-white border border-brand-border rounded-xl p-4 shadow-sm">
+          <h3 class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-2 font-display">Event &amp; Load Advisory</h3>
+          <ul id="advisory-list" class="space-y-1.5 text-xs text-brand-muted leading-relaxed"></ul>
         </div>
 
-        <!-- Recent metrics table -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Recent Health Metrics</h3>
+        <!-- Recent metrics -->
+        <div class="bg-white border border-brand-border rounded-xl p-4 shadow-sm">
+          <h3 class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-3 font-display">Recent Health Metrics</h3>
           <div class="overflow-x-auto">
             <table class="w-full text-xs">
               <thead>
-                <tr class="text-gray-600 border-b border-gray-800">
+                <tr class="text-brand-muted border-b border-brand-border">
                   <th class="text-left py-2 pr-3 font-medium">Date</th>
                   <th class="text-right py-2 pr-3 font-medium">HRV</th>
                   <th class="text-right py-2 pr-3 font-medium">Sleep</th>
@@ -216,7 +258,7 @@
                   <th class="text-right py-2 font-medium">TSS</th>
                 </tr>
               </thead>
-              <tbody id="metrics-table" class="divide-y divide-gray-800/50"></tbody>
+              <tbody id="metrics-table" class="divide-y divide-brand-border"></tbody>
             </table>
           </div>
         </div>
@@ -224,9 +266,9 @@
       </div>
     </div>
   </div>
-</div>
+</div><!-- end view-training -->
 
-<!-- ═══════════════════ RACE ANALYZER ═══════════════════ -->
+<!-- ═══════ RACE ANALYZER ═══════ -->
 <div id="view-race">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
@@ -234,149 +276,139 @@
     <div class="space-y-4">
 
       <!-- File Upload -->
-      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
-        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Route File</h2>
-        <div id="drop-zone"
-          class="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center cursor-pointer hover:border-orange-500/60 transition-colors"
-          onclick="document.getElementById('file-input').click()"
-          ondragover="event.preventDefault(); this.classList.add('drop-active')"
-          ondragleave="this.classList.remove('drop-active')"
-          ondrop="handleDrop(event)">
-          <div class="text-3xl mb-2 select-none">📁</div>
-          <p class="text-sm text-gray-400">Drop GPX or KML here</p>
-          <p class="text-xs text-gray-600 mt-0.5">or click to browse</p>
-          <p id="filename-display" class="text-sm text-orange-400 mt-2 font-medium hidden"></p>
-        </div>
-        <input type="file" id="file-input" accept=".gpx,.kml" class="hidden" onchange="handleFileSelect(this)">
+      <div class="bg-white rounded-xl border border-brand-border p-4 shadow-sm"
+        ondrop="handleDrop(event)" ondragover="event.preventDefault()"
+        ondragenter="this.classList.add('drop-active')" ondragleave="this.classList.remove('drop-active')">
+        <h2 class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-3 font-display">Route File</h2>
+        <label class="flex flex-col items-center justify-center border-2 border-dashed border-brand-border rounded-xl py-6 px-4 cursor-pointer hover:border-brand-accent transition-colors group">
+          <input type="file" accept=".gpx,.kml" class="hidden" onchange="setFile(this.files[0])">
+          <span class="text-3xl mb-2 opacity-40 group-hover:opacity-60 transition-opacity">📁</span>
+          <span class="text-xs text-brand-muted text-center">Drop GPX / KML here or <span class="text-brand-accent font-medium">browse</span></span>
+        </label>
+        <p id="filename-display" class="hidden text-xs text-brand-accent mt-2 font-medium"></p>
+        <p id="event-source-label" class="hidden text-xs text-brand-muted mt-1 italic"></p>
       </div>
 
-      <!-- Athlete Profile -->
-      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
-        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Athlete Profile</h2>
+      <!-- Athlete Parameters -->
+      <div class="bg-white rounded-xl border border-brand-border p-4 shadow-sm">
+        <h2 class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-3 font-display">Athlete</h2>
         <div class="space-y-3">
           <div>
-            <label class="text-xs text-gray-500 block mb-1">Body Weight (kg)</label>
-            <input type="number" id="body-weight" value="75" min="30" max="200" step="0.5"
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
+            <label id="kit-label" class="text-xs text-brand-muted block mb-1">Bike + Kit Weight (kg)</label>
+            <input type="number" id="kit-weight" value="8" min="0" max="30" step="0.5"
+              class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-sm focus:border-brand-accent focus:outline-none transition-colors text-brand-primary"
               oninput="onParamChange()">
           </div>
           <div>
-            <label id="kit-label" class="text-xs text-gray-500 block mb-1">Bike + Kit Weight (kg)</label>
-            <input type="number" id="kit-weight" value="8" min="0" max="30" step="0.5"
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
+            <label class="text-xs text-brand-muted block mb-1">Body Weight (kg)</label>
+            <input type="number" id="body-weight" value="75" min="40" max="150" step="0.5"
+              class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-sm focus:border-brand-accent focus:outline-none transition-colors text-brand-primary"
               oninput="onParamChange()">
-          </div>
-          <div class="border-t border-gray-800 pt-3">
-            <label class="text-xs text-gray-500 block mb-1">VO₂ Max (mL/kg/min)</label>
-            <input type="number" id="vo2max" placeholder="e.g. 52" min="20" max="100" step="1"
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
-              oninput="onParamChange()">
-            <p class="text-xs text-gray-700 mt-1.5 leading-relaxed">
-              From Apple Health or a lab test. Enables intensity zone heatmap &amp; aerobic ceiling (W<sub>max</sub>).
-              Typical values: recreational <strong class="text-gray-500">35–45</strong>,
-              trained <strong class="text-gray-500">45–60</strong>,
-              elite <strong class="text-gray-500">60–80+</strong>.
-            </p>
-            <p id="vo2-pace-hint" class="text-xs text-orange-400/70 mt-1 leading-relaxed hidden"></p>
-          </div>
-          <div class="border-t border-gray-800 pt-3 space-y-2">
-            <label class="text-xs text-gray-500 block mb-1">FTP — Functional Threshold Power (W)</label>
-            <input type="number" id="ftp" placeholder="e.g. 250" min="50" max="600" step="1"
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
-              oninput="onParamChange()">
-            <p class="text-xs text-gray-700 mt-1.5 leading-relaxed">
-              Max sustainable power for ~60 min (Coggan scale). Overrides VO₂ Max threshold when priority is on.
-              Typical values: recreational <strong class="text-gray-500">150–200 W</strong>,
-              trained <strong class="text-gray-500">200–300 W</strong>,
-              elite <strong class="text-gray-500">300–450 W</strong>.
-            </p>
-            <label class="flex items-center gap-2 cursor-pointer text-xs text-gray-400 mt-1 select-none">
-              <input type="checkbox" id="ftp-priority" class="accent-orange-500 cursor-pointer" onchange="onParamChange()">
-              Priority: use FTP for zone thresholds (overrides VO₂ Max estimate)
-            </label>
           </div>
         </div>
       </div>
 
       <!-- Target -->
-      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
-        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Target</h2>
+      <div class="bg-white rounded-xl border border-brand-border p-4 shadow-sm">
+        <h2 class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-3 font-display">Target</h2>
         <div class="space-y-3">
           <div class="flex gap-4">
-            <label class="flex items-center gap-2 cursor-pointer text-sm">
+            <label class="flex items-center gap-2 cursor-pointer text-sm text-brand-primary">
               <input type="radio" name="target-type" value="speed" checked onchange="toggleTargetInput()">
               Speed
             </label>
-            <label class="flex items-center gap-2 cursor-pointer text-sm">
+            <label class="flex items-center gap-2 cursor-pointer text-sm text-brand-primary">
               <input type="radio" name="target-type" value="time" onchange="toggleTargetInput()">
               Total Time
             </label>
           </div>
           <div id="speed-wrap">
-            <label class="text-xs text-gray-500 block mb-1">Target Speed (km/h)</label>
+            <label class="text-xs text-brand-muted block mb-1">Target Speed (km/h)</label>
             <input type="number" id="target-speed" value="30" min="5" max="120" step="0.5"
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none transition-colors"
+              class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-sm focus:border-brand-accent focus:outline-none transition-colors text-brand-primary"
               oninput="onParamChange()">
-            <p id="speed-derived-time" class="text-xs text-gray-500 mt-1 hidden"></p>
+            <p id="speed-derived-time" class="text-xs text-brand-muted mt-1 hidden"></p>
           </div>
           <div id="time-wrap" class="hidden">
-            <label class="text-xs text-gray-500 block mb-1">Target Time (HH:MM)</label>
+            <label class="text-xs text-brand-muted block mb-1">Target Time (HH:MM)</label>
             <input type="text" id="target-time" placeholder="04:30"
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm font-mono focus:border-orange-500 focus:outline-none transition-colors"
+              class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-sm font-mono focus:border-brand-accent focus:outline-none transition-colors text-brand-primary"
               oninput="onParamChange()">
-            <p id="time-derived-speed" class="text-xs text-gray-500 mt-1 hidden"></p>
+            <p id="time-derived-speed" class="text-xs text-brand-muted mt-1 hidden"></p>
           </div>
         </div>
       </div>
 
       <!-- Physiology -->
-      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
-        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Physiology</h2>
+      <div class="bg-white rounded-xl border border-brand-border p-4 shadow-sm">
+        <h2 class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-3 font-display">Physiology</h2>
         <div class="space-y-4">
           <div>
             <div class="flex justify-between mb-1.5">
-              <label class="text-xs text-gray-500">Metabolic Efficiency</label>
-              <span id="efficiency-val" class="text-xs text-orange-400 font-mono">24%</span>
+              <label class="text-xs text-brand-muted">Metabolic Efficiency</label>
+              <span id="efficiency-val" class="text-xs text-brand-accent font-mono">24%</span>
             </div>
             <input type="range" id="efficiency" min="15" max="35" value="24" step="1" class="w-full"
               oninput="document.getElementById('efficiency-val').textContent = this.value + '%'; onParamChange()">
-            <p class="text-xs text-gray-600 mt-1.5 leading-relaxed">
+            <p class="text-xs text-brand-muted mt-1.5 leading-relaxed">
               How efficiently your body converts food energy into mechanical work.
-              <strong class="text-gray-500">24 %</strong> is the standard default for most trained cyclists and runners.
-              Recreational athletes are typically <strong class="text-gray-500">20–22 %</strong>;
-              elite athletes can reach <strong class="text-gray-500">26–28 %</strong>.
-              A higher value lowers the kcal burn estimate.
+              <strong class="text-brand-primary">24%</strong> is the standard default.
+              Recreational: <strong class="text-brand-primary">20–22%</strong>;
+              elite: <strong class="text-brand-primary">26–28%</strong>.
             </p>
           </div>
           <div>
             <div class="flex justify-between mb-1.5">
-              <label class="text-xs text-gray-500">Hourly Carb Target</label>
-              <span id="hourly-carbs-val" class="text-xs text-orange-400 font-mono">60 g/hr</span>
+              <label class="text-xs text-brand-muted">Hourly Carb Target</label>
+              <span id="hourly-carbs-val" class="text-xs text-brand-accent font-mono">60 g/hr</span>
             </div>
             <input type="range" id="hourly-carbs" min="30" max="120" value="60" step="5" class="w-full"
               oninput="document.getElementById('hourly-carbs-val').textContent = this.value + ' g/hr'; onParamChange()">
-            <p class="text-xs text-gray-600 mt-1.5 leading-relaxed">
-              Carbohydrates you plan to consume per hour of effort.
-              <strong class="text-gray-500">30–60 g/hr</strong> suits most training rides and runs under 2 h.
-              For long-distance events (&gt; 2.5 h) aim for
-              <strong class="text-gray-500">60–90 g/hr</strong>.
-              Elite endurance athletes with trained guts can absorb up to
-              <strong class="text-gray-500">120 g/hr</strong> using mixed carb sources.
+            <p class="text-xs text-brand-muted mt-1.5 leading-relaxed">
+              <strong class="text-brand-primary">30–60 g/hr</strong> for efforts under 2h.
+              Long events: <strong class="text-brand-primary">60–90 g/hr</strong>.
+              Elite with trained gut: up to <strong class="text-brand-primary">120 g/hr</strong>.
             </p>
           </div>
-          <div class="border-t border-gray-800 pt-4">
+          <div class="border-t border-brand-border pt-3">
+            <label class="text-xs text-brand-muted block mb-1">VO₂ Max (mL/kg/min)</label>
+            <input type="number" id="vo2max" placeholder="e.g. 52" min="20" max="100" step="1"
+              class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-sm focus:border-brand-accent focus:outline-none transition-colors text-brand-primary"
+              oninput="onParamChange()">
+            <p class="text-xs text-brand-muted mt-1.5 leading-relaxed">
+              From Apple Health or lab test. Enables intensity zone heatmap.
+              Recreational <strong class="text-brand-primary">35–45</strong> ·
+              trained <strong class="text-brand-primary">45–60</strong> ·
+              elite <strong class="text-brand-primary">60–80+</strong>.
+            </p>
+            <p id="vo2-pace-hint" class="text-xs text-brand-accent mt-1 leading-relaxed hidden"></p>
+          </div>
+          <div class="border-t border-brand-border pt-3 space-y-2">
+            <label class="text-xs text-brand-muted block mb-1">FTP — Functional Threshold Power (W)</label>
+            <input type="number" id="ftp" placeholder="e.g. 250" min="50" max="600" step="1"
+              class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-sm focus:border-brand-accent focus:outline-none transition-colors text-brand-primary"
+              oninput="onParamChange()">
+            <p class="text-xs text-brand-muted mt-1.5 leading-relaxed">
+              Max sustainable power for ~60 min. Recreational <strong class="text-brand-primary">150–200 W</strong> ·
+              trained <strong class="text-brand-primary">200–300 W</strong> · elite <strong class="text-brand-primary">300–450 W</strong>.
+            </p>
+            <label class="flex items-center gap-2 cursor-pointer text-xs text-brand-muted mt-1 select-none">
+              <input type="checkbox" id="ftp-priority" class="cursor-pointer" onchange="onParamChange()">
+              Priority: use FTP for zone thresholds (overrides VO₂ Max estimate)
+            </label>
+          </div>
+          <div class="border-t border-brand-border pt-3">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <p class="text-xs text-gray-400 font-medium">Altitude Hypoxia Modeling</p>
-                <p class="text-xs text-gray-600 mt-1 leading-relaxed">
-                  Applies a ~1 % aerobic power loss per 100 m above 1500 m, plus a 5 % metabolic cost
-                  penalty above 1800 m (respiratory stress). Critical for Alpine events like Livigno or
-                  high-altitude marathon courses. Requires VO₂ Max to be set.
+                <p class="text-xs text-brand-primary font-medium">Altitude Hypoxia Modeling</p>
+                <p class="text-xs text-brand-muted mt-1 leading-relaxed">
+                  ~1% aerobic power loss per 100m above 1500m, plus 5% metabolic cost above 1800m.
+                  Requires VO₂ Max or FTP to be set.
                 </p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer mt-0.5 shrink-0">
                 <input type="checkbox" id="hypoxia-toggle" class="sr-only peer" onchange="onParamChange()">
-                <div class="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:bg-orange-500
+                <div class="w-9 h-5 bg-brand-border rounded-full peer peer-checked:bg-brand-accent
                   after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white
                   after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4"></div>
               </label>
@@ -386,30 +418,30 @@
       </div>
 
       <!-- Nutrition Mixer -->
-      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+      <div class="bg-white rounded-xl border border-brand-border p-4 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Nutrition Mixer</h2>
-          <span id="mix-badge" class="text-xs font-mono text-gray-500">Σ <span id="mix-total">100</span>%</span>
+          <h2 class="text-xs font-semibold text-brand-muted uppercase tracking-widest font-display">Nutrition Mixer</h2>
+          <span id="mix-badge" class="text-xs font-mono text-brand-muted">Σ <span id="mix-total">100</span>%</span>
         </div>
         <div class="space-y-4">
           <div>
             <div class="flex justify-between mb-1.5">
-              <label class="text-xs text-gray-500">🍫 Energy Bars <span class="text-gray-700">(30 g carbs)</span></label>
-              <span id="bars-val" class="text-xs text-orange-400 font-mono">40%</span>
+              <label class="text-xs text-brand-muted">🍫 Energy Bars <span class="text-brand-border">(30 g carbs)</span></label>
+              <span id="bars-val" class="text-xs text-brand-accent font-mono">40%</span>
             </div>
             <input type="range" id="bars-pct" min="0" max="100" value="40" step="5" class="w-full" oninput="updateMix()">
           </div>
           <div>
             <div class="flex justify-between mb-1.5">
-              <label class="text-xs text-gray-500">💧 Gels <span class="text-gray-700">(25 g carbs)</span></label>
-              <span id="gels-val" class="text-xs text-orange-400 font-mono">30%</span>
+              <label class="text-xs text-brand-muted">💧 Gels <span class="text-brand-border">(25 g carbs)</span></label>
+              <span id="gels-val" class="text-xs text-brand-accent font-mono">30%</span>
             </div>
             <input type="range" id="gels-pct" min="0" max="100" value="30" step="5" class="w-full" oninput="updateMix()">
           </div>
           <div>
             <div class="flex justify-between mb-1.5">
-              <label class="text-xs text-gray-500">🥤 Isotonic Drink <span class="text-gray-700">(30 g/500 ml)</span></label>
-              <span id="iso-val" class="text-xs text-orange-400 font-mono">30%</span>
+              <label class="text-xs text-brand-muted">🥤 Isotonic Drink <span class="text-brand-border">(30 g/500 ml)</span></label>
+              <span id="iso-val" class="text-xs text-brand-accent font-mono">30%</span>
             </div>
             <input type="range" id="iso-pct" min="0" max="100" value="30" step="5" class="w-full" oninput="updateMix()">
           </div>
@@ -417,37 +449,37 @@
       </div>
 
       <!-- Smoothing -->
-      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+      <div class="bg-white rounded-xl border border-brand-border p-4 shadow-sm">
         <div class="flex justify-between mb-1.5">
-          <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Elevation Smoothing</h2>
-          <span id="smoothing-val" class="text-xs text-orange-400 font-mono">5</span>
+          <h2 class="text-xs font-semibold text-brand-muted uppercase tracking-widest font-display">Elevation Smoothing</h2>
+          <span id="smoothing-val" class="text-xs text-brand-accent font-mono">5</span>
         </div>
         <input type="range" id="smoothing" min="1" max="25" value="5" step="1" class="w-full"
           oninput="document.getElementById('smoothing-val').textContent = this.value; onParamChange()">
-        <p class="text-xs text-gray-700 mt-1.5">Applies moving average to reduce GPS elevation noise</p>
+        <p class="text-xs text-brand-muted mt-1.5">Applies moving average to reduce GPS elevation noise</p>
       </div>
 
       <!-- Process Button -->
       <button id="process-btn" onclick="processData()"
-        class="w-full bg-orange-500 hover:bg-orange-400 disabled:bg-gray-800 disabled:text-gray-600 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition-colors text-sm"
+        class="w-full bg-brand-accent hover:bg-brand-hover disabled:bg-brand-border disabled:text-brand-muted disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition-colors text-sm"
         disabled>
         ⚡ Process File
       </button>
 
-      <div id="error-msg" class="hidden bg-red-950 border border-red-800 text-red-300 text-xs rounded-lg p-3 leading-relaxed"></div>
-    </div>
+      <div id="error-msg" class="hidden bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg p-3 leading-relaxed"></div>
+    </div><!-- end left panel -->
 
     <!-- ══ RIGHT PANEL ══ -->
     <div class="lg:col-span-2 space-y-4">
 
-      <!-- Elevation + Power Chart -->
-      <div class="bg-gray-900 rounded-xl border border-gray-800 p-4">
+      <!-- Chart -->
+      <div class="bg-white rounded-xl border border-brand-border p-4 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Elevation &amp; Power Profile</h2>
-          <div id="chart-legend" class="hidden flex flex-wrap gap-3 items-center"></div>
+          <h2 class="text-xs font-semibold text-brand-muted uppercase tracking-widest font-display">Elevation &amp; Power Profile</h2>
+          <div id="chart-legend" class="hidden flex-wrap gap-3 items-center"></div>
         </div>
-        <div id="chart-placeholder" class="flex flex-col items-center justify-center py-16 text-gray-700">
-          <div class="text-5xl mb-3 opacity-40">📈</div>
+        <div id="chart-placeholder" class="flex flex-col items-center justify-center py-16 text-brand-muted">
+          <div class="text-5xl mb-3 opacity-30">📈</div>
           <p class="text-sm">Upload a GPX or KML file and press Process</p>
         </div>
         <canvas id="chart-canvas" class="hidden w-full rounded-lg" style="height:280px"></canvas>
@@ -457,122 +489,121 @@
       <div id="summary-section" class="hidden fade-in">
         <!-- Row 1: Route -->
         <div class="grid grid-cols-3 gap-3 mb-3">
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
-            <p class="text-xs text-gray-600 mb-0.5">Distance</p>
-            <p id="s-distance" class="text-base font-bold text-white">—</p>
+          <div class="bg-white border border-brand-border rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-brand-muted mb-0.5">Distance</p>
+            <p id="s-distance" class="text-base font-bold text-brand-primary">—</p>
           </div>
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
-            <p class="text-xs text-gray-600 mb-0.5">Elev. Gain</p>
-            <p id="s-elevation" class="text-base font-bold text-white">—</p>
+          <div class="bg-white border border-brand-border rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-brand-muted mb-0.5">Elev. Gain</p>
+            <p id="s-elevation" class="text-base font-bold text-brand-primary">—</p>
           </div>
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
-            <p class="text-xs text-gray-600 mb-0.5">Est. Time</p>
-            <p id="s-time" class="text-base font-bold text-white">—</p>
+          <div class="bg-white border border-brand-border rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-brand-muted mb-0.5">Est. Time</p>
+            <p id="s-time" class="text-base font-bold text-brand-primary">—</p>
           </div>
         </div>
         <!-- Row 2: Performance -->
         <div class="grid grid-cols-3 gap-3 mb-3">
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
-            <p class="text-xs text-gray-600 mb-0.5">Avg Power</p>
-            <p id="s-power" class="text-base font-bold text-white">—</p>
+          <div class="bg-white border border-brand-border rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-brand-muted mb-0.5">Avg Power</p>
+            <p id="s-power" class="text-base font-bold text-brand-primary">—</p>
           </div>
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-3">
-            <p class="text-xs text-gray-600 mb-0.5">Energy</p>
-            <p id="s-kcal" class="text-base font-bold text-white">—</p>
+          <div class="bg-white border border-brand-border rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-brand-muted mb-0.5">Energy</p>
+            <p id="s-kcal" class="text-base font-bold text-brand-primary">—</p>
           </div>
-          <div class="bg-gray-900 border border-orange-900/50 rounded-xl p-3">
-            <p class="text-xs text-orange-700 mb-0.5">⚡ Max Power</p>
-            <p id="s-maxpower" class="text-base font-bold text-orange-400">—</p>
-            <p id="s-maxpower-grad" class="text-xs text-gray-600 mt-0.5">—</p>
-            <p id="s-maxpower-dur" class="text-xs text-gray-600">—</p>
+          <div class="bg-white border border-[#3D8B6E]/30 rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-brand-accent mb-0.5">⚡ Max Power</p>
+            <p id="s-maxpower" class="text-base font-bold text-brand-accent">—</p>
+            <p id="s-maxpower-grad" class="text-xs text-brand-muted mt-0.5">—</p>
+            <p id="s-maxpower-dur" class="text-xs text-brand-muted">—</p>
           </div>
         </div>
-        <!-- Row 3: Zone time breakdown (only when threshold active) -->
+        <!-- Row 3: Zone time -->
         <div id="zone-time-row" class="hidden grid-cols-4 gap-3 mb-3">
-          <div class="bg-gray-900 border border-blue-900/40 rounded-xl p-3">
-            <p class="text-xs text-blue-700 mb-0.5">Z1 Recovery</p>
-            <p id="s-z1-time" class="text-sm font-bold text-blue-400">—</p>
-            <p id="s-z1-pct" class="text-xs text-gray-600 mt-0.5">—</p>
+          <div class="bg-white border border-blue-200 rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-blue-500 mb-0.5">Z1 Recovery</p>
+            <p id="s-z1-time" class="text-sm font-bold text-blue-600">—</p>
+            <p id="s-z1-pct" class="text-xs text-brand-muted mt-0.5">—</p>
           </div>
-          <div class="bg-gray-900 border border-green-900/40 rounded-xl p-3">
-            <p class="text-xs text-green-700 mb-0.5">Z2 Tempo</p>
-            <p id="s-z2-time" class="text-sm font-bold text-green-400">—</p>
-            <p id="s-z2-pct" class="text-xs text-gray-600 mt-0.5">—</p>
+          <div class="bg-white border border-green-200 rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-brand-accent mb-0.5">Z2 Tempo</p>
+            <p id="s-z2-time" class="text-sm font-bold text-brand-accent">—</p>
+            <p id="s-z2-pct" class="text-xs text-brand-muted mt-0.5">—</p>
           </div>
-          <div class="bg-gray-900 border border-yellow-900/40 rounded-xl p-3">
-            <p class="text-xs text-yellow-700 mb-0.5">Z3 Threshold</p>
-            <p id="s-z3-time" class="text-sm font-bold text-yellow-400">—</p>
-            <p id="s-z3-pct" class="text-xs text-gray-600 mt-0.5">—</p>
+          <div class="bg-white border border-yellow-200 rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-yellow-600 mb-0.5">Z3 Threshold</p>
+            <p id="s-z3-time" class="text-sm font-bold text-yellow-600">—</p>
+            <p id="s-z3-pct" class="text-xs text-brand-muted mt-0.5">—</p>
           </div>
-          <div class="bg-gray-900 border border-red-900/40 rounded-xl p-3">
-            <p class="text-xs text-red-700 mb-0.5">Z4 Anaerobic</p>
-            <p id="s-z4-time" class="text-sm font-bold text-red-400">—</p>
-            <p id="s-z4-pct" class="text-xs text-gray-600 mt-0.5">—</p>
+          <div class="bg-white border border-red-200 rounded-xl p-3 shadow-sm">
+            <p class="text-xs text-red-500 mb-0.5">Z4 Anaerobic</p>
+            <p id="s-z4-time" class="text-sm font-bold text-red-500">—</p>
+            <p id="s-z4-pct" class="text-xs text-brand-muted mt-0.5">—</p>
           </div>
         </div>
 
-        <!-- Red Zone Vulnerability Bar -->
-        <div id="redzone-bar" class="hidden bg-red-950/30 border border-red-900/40 rounded-xl p-3 mb-3">
+        <!-- Red Zone bar -->
+        <div id="redzone-bar" class="hidden bg-red-50 border border-red-200 rounded-xl p-3 mb-3">
           <div class="flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
               <span class="text-xl shrink-0">🔴</span>
               <div>
-                <p class="text-xs font-semibold text-red-400">Critical Fatigue Zone</p>
-                <p class="text-xs text-gray-600 mt-0.5">Distance where required power exceeds threshold (&gt; 105 % — Zone 4 Anaerobic)</p>
+                <p class="text-xs font-semibold text-red-600">Critical Fatigue Zone</p>
+                <p class="text-xs text-red-400 mt-0.5">Distance where required power exceeds threshold (&gt;105% — Zone 4 Anaerobic)</p>
               </div>
             </div>
             <div class="text-right shrink-0">
-              <p id="s-redzone-dist" class="text-xl font-bold text-red-400">—</p>
-              <p id="s-redzone-pct" class="text-xs text-gray-600">—</p>
+              <p id="s-redzone-dist" class="text-xl font-bold text-red-600">—</p>
+              <p id="s-redzone-pct" class="text-xs text-brand-muted">—</p>
             </div>
           </div>
         </div>
 
         <!-- Fuel Plan -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+        <div class="bg-white border border-brand-border rounded-xl p-4 shadow-sm">
           <div class="flex items-center justify-between mb-3">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Fuel Plan</h3>
-            <span class="text-xs text-gray-700">Updates instantly with mixer changes</span>
+            <h3 class="text-xs font-semibold text-brand-muted uppercase tracking-widest font-display">Fuel Plan</h3>
+            <span class="text-xs text-brand-muted">Updates instantly with mixer changes</span>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="bg-gray-800 rounded-lg p-3">
-              <p class="text-xs text-gray-500 mb-0.5">Total Carbs</p>
-              <p id="f-carbs" class="text-xl font-bold text-orange-400">—</p>
+            <div class="bg-brand-surface rounded-lg p-3">
+              <p class="text-xs text-brand-muted mb-0.5">Total Carbs</p>
+              <p id="f-carbs" class="text-xl font-bold text-brand-accent">—</p>
             </div>
-            <div class="bg-gray-800 rounded-lg p-3">
-              <p class="text-xs text-gray-500 mb-0.5">🍫 Bars</p>
-              <p id="f-bars" class="text-xl font-bold text-white">—</p>
+            <div class="bg-brand-surface rounded-lg p-3">
+              <p class="text-xs text-brand-muted mb-0.5">🍫 Bars</p>
+              <p id="f-bars" class="text-xl font-bold text-brand-primary">—</p>
             </div>
-            <div class="bg-gray-800 rounded-lg p-3">
-              <p class="text-xs text-gray-500 mb-0.5">💧 Gels</p>
-              <p id="f-gels" class="text-xl font-bold text-white">—</p>
+            <div class="bg-brand-surface rounded-lg p-3">
+              <p class="text-xs text-brand-muted mb-0.5">💧 Gels</p>
+              <p id="f-gels" class="text-xl font-bold text-brand-primary">—</p>
             </div>
-            <div class="bg-gray-800 rounded-lg p-3">
-              <p class="text-xs text-gray-500 mb-0.5">🥤 Bottles</p>
-              <p id="f-iso" class="text-xl font-bold text-white">—</p>
+            <div class="bg-brand-surface rounded-lg p-3">
+              <p class="text-xs text-brand-muted mb-0.5">🥤 Bottles</p>
+              <p id="f-iso" class="text-xl font-bold text-brand-primary">—</p>
             </div>
           </div>
-          <!-- Zone advisory: shown when >15 % of route is anaerobic -->
-          <div id="zone-advisory" class="hidden bg-amber-950/30 border border-amber-900/40 rounded-lg p-3 mt-3 text-xs leading-relaxed">
-            <p class="text-amber-300 font-semibold mb-0.5">⚡ Red Zone Advisory</p>
-            <p id="zone-advisory-text" class="text-gray-500"></p>
+          <div id="zone-advisory" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3 text-xs leading-relaxed">
+            <p class="text-yellow-700 font-semibold mb-0.5">⚡ Zone 3/4 Nutrition Advisory</p>
+            <p id="zone-advisory-text" class="text-yellow-600"></p>
           </div>
         </div>
       </div>
 
       <!-- Data Table -->
-      <div id="table-section" class="hidden bg-gray-900 border border-gray-800 rounded-xl p-4 fade-in">
+      <div id="table-section" class="hidden bg-white border border-brand-border rounded-xl p-4 fade-in shadow-sm">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Interval Data</h2>
+          <h2 class="text-xs font-semibold text-brand-muted uppercase tracking-widest font-display">Interval Data</h2>
           <button onclick="exportCSV()"
-            class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition-colors border border-gray-700 font-medium">
+            class="text-xs bg-brand-surface hover:bg-brand-border text-brand-primary px-3 py-1.5 rounded-lg transition-colors border border-brand-border font-medium">
             ⬇ Export CSV
           </button>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-xs">
             <thead>
-              <tr class="text-gray-600 border-b border-gray-800">
+              <tr class="text-brand-muted border-b border-brand-border">
                 <th class="text-left py-2 pr-3 font-medium">Distance</th>
                 <th class="text-right py-2 pr-3 font-medium">Elevation</th>
                 <th class="text-right py-2 pr-3 font-medium">Gradient</th>
@@ -582,13 +613,13 @@
                 <th class="text-right py-2 font-medium">Zone</th>
               </tr>
             </thead>
-            <tbody id="table-body" class="divide-y divide-gray-800/50"></tbody>
+            <tbody id="table-body" class="divide-y divide-brand-border"></tbody>
           </table>
         </div>
-        <p class="text-xs text-gray-700 mt-2">Showing first 50 intervals — export CSV for full dataset.</p>
+        <p class="text-xs text-brand-muted mt-2">Showing first 50 intervals — export CSV for full dataset.</p>
       </div>
 
-    </div>
+    </div><!-- end right panel -->
   </div>
 </div><!-- end view-race -->
 </main>
@@ -598,22 +629,36 @@
 // STATE
 // ════════════════════════════════════════════════════════════════
 let sport = 'cycling';
-let rawIntervals = null;   // [{d, e}] from server
-let computed = null;       // [{d,e,g,w,k,c,z,r,wm}] after physics
+let rawIntervals = null;
+let computed = null;
 let totalDistM = 0;
 let totalHours = 0;
-let baseWMax = 0;          // aerobic ceiling W (from VO2Max); 0 = not set
-let baseFTP  = 0;          // active zone threshold W (FTP or 0.8×W_max); 0 = zones off
-let thresholdLabel = '';   // 'FTP' | 'Threshold' — for chart legend
-let redDistFraction = 0;   // fraction of route in zone 4 (anaerobic)
+let baseWMax = 0;
+let baseFTP  = 0;
+let thresholdLabel = '';
+let redDistFraction = 0;
+
+// ════════════════════════════════════════════════════════════════
+// VIEW TOGGLE
+// ════════════════════════════════════════════════════════════════
+function setView(v) {
+  const isTraining = v === 'training';
+  document.getElementById('view-race').classList.toggle('hidden', isTraining);
+  document.getElementById('view-training').classList.toggle('hidden', !isTraining);
+  const activeClass = 'px-3 py-1 rounded-md text-xs font-semibold transition-all bg-brand-primary text-white';
+  const idleClass   = 'px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary';
+  document.getElementById('btn-race').className     = !isTraining ? activeClass : idleClass;
+  document.getElementById('btn-training').className =  isTraining ? activeClass : idleClass;
+  if (isTraining) loadDashboard();
+}
 
 // ════════════════════════════════════════════════════════════════
 // SPORT TOGGLE
 // ════════════════════════════════════════════════════════════════
 function setSport(s) {
   sport = s;
-  const active = 'px-3 py-1 rounded-md text-xs font-semibold transition-all bg-orange-500 text-white';
-  const idle   = 'px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white';
+  const active = 'px-3 py-1 rounded-md text-xs font-semibold transition-all bg-brand-accent text-white';
+  const idle   = 'px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary';
   document.getElementById('btn-cycling').className = s === 'cycling' ? active : idle;
   document.getElementById('btn-running').className = s === 'running'  ? active : idle;
   document.getElementById('kit-label').textContent = s === 'cycling' ? 'Bike + Kit Weight (kg)' : 'Running Kit Weight (kg)';
@@ -635,7 +680,7 @@ function toggleTargetInput() {
 }
 
 // ════════════════════════════════════════════════════════════════
-// NUTRITION MIXER  (instant update)
+// NUTRITION MIXER
 // ════════════════════════════════════════════════════════════════
 function updateMix() {
   const b = +document.getElementById('bars-pct').value;
@@ -647,7 +692,7 @@ function updateMix() {
   const sum = b + g + i;
   document.getElementById('mix-total').textContent = sum;
   document.getElementById('mix-badge').className =
-    'text-xs font-mono ' + (sum === 100 ? 'text-green-500' : 'text-red-400');
+    'text-xs font-mono ' + (sum === 100 ? 'text-brand-accent' : 'text-red-500');
   if (totalHours > 0) updateFuel();
 }
 
@@ -658,13 +703,9 @@ let selectedFile = null;
 
 function handleDrop(ev) {
   ev.preventDefault();
-  document.getElementById('drop-zone').classList.remove('drop-active');
+  ev.currentTarget.classList.remove('drop-active');
   const f = ev.dataTransfer.files[0];
   if (f) setFile(f);
-}
-
-function handleFileSelect(input) {
-  if (input.files[0]) setFile(input.files[0]);
 }
 
 function setFile(f) {
@@ -673,26 +714,24 @@ function setFile(f) {
   disp.textContent = '✓ ' + f.name;
   disp.classList.remove('hidden');
   document.getElementById('process-btn').disabled = false;
-
-  // Clear stale results from any previously processed file
-  rawIntervals = null;
-  computed     = null;
-  totalDistM   = 0;
-  totalHours   = 0;
-  baseWMax     = 0;
-  baseFTP      = 0;
-  redDistFraction = 0;
+  // Clear stale results
+  rawIntervals = null; computed = null;
+  totalDistM = 0; totalHours = 0;
+  baseWMax = 0; baseFTP = 0; redDistFraction = 0;
   document.getElementById('summary-section').classList.add('hidden');
   document.getElementById('table-section').classList.add('hidden');
   document.getElementById('chart-canvas').classList.add('hidden');
   document.getElementById('chart-placeholder').classList.remove('hidden');
   document.getElementById('chart-legend').classList.add('hidden');
+  document.getElementById('chart-legend').classList.remove('flex');
   document.getElementById('error-msg').classList.add('hidden');
+  const srcLabel = document.getElementById('event-source-label');
+  if (srcLabel) srcLabel.classList.add('hidden');
   updateTargetIndication();
 }
 
 // ════════════════════════════════════════════════════════════════
-// PROCESS  (server call to parse GPX/KML)
+// PROCESS (server call)
 // ════════════════════════════════════════════════════════════════
 async function processData() {
   if (!selectedFile) return;
@@ -700,7 +739,6 @@ async function processData() {
   btn.textContent = '⏳ Parsing...';
   btn.disabled = true;
   document.getElementById('error-msg').classList.add('hidden');
-
   try {
     const fd = new FormData();
     fd.append('file', selectedFile);
@@ -730,32 +768,24 @@ function updateTargetIndication() {
   const distKm = totalDistM / 1000;
   const timeEl  = document.getElementById('speed-derived-time');
   const speedEl = document.getElementById('time-derived-speed');
-
-  // Speed mode → show derived total time
   if (timeEl) {
     const spd = parseFloat(document.getElementById('target-speed').value);
     if (distKm > 0 && spd > 0) {
       const hrs = distKm / spd;
       const hh  = Math.floor(hrs);
       const mm  = Math.round((hrs - hh) * 60);
-      timeEl.textContent = `→ Total time: ${hh}h ${String(mm).padStart(2, '0')}m`;
+      timeEl.textContent = '→ Total time: ' + hh + 'h ' + String(mm).padStart(2, '0') + 'm';
       timeEl.classList.remove('hidden');
-    } else {
-      timeEl.classList.add('hidden');
-    }
+    } else { timeEl.classList.add('hidden'); }
   }
-
-  // Time mode → show derived average speed
   if (speedEl) {
     const t = document.getElementById('target-time').value;
     const [hh, mm] = t.split(':').map(Number);
     const hrs = (hh || 0) + (mm || 0) / 60;
     if (distKm > 0 && hrs > 0) {
-      speedEl.textContent = `→ Avg speed: ${(distKm / hrs).toFixed(1)} km/h`;
+      speedEl.textContent = '→ Avg speed: ' + (distKm / hrs).toFixed(1) + ' km/h';
       speedEl.classList.remove('hidden');
-    } else {
-      speedEl.classList.add('hidden');
-    }
+    } else { speedEl.classList.add('hidden'); }
   }
 }
 
@@ -765,11 +795,10 @@ function updateVo2PaceHint() {
   const vo2 = parseFloat(document.getElementById('vo2max').value) || 0;
   if (vo2 <= 0) { hintEl.classList.add('hidden'); return; }
   if (sport === 'running') {
-    // ratio = v_m/s × 12.74 / vo2  →  boundary speeds in km/h
     const v75  = (vo2 * 0.75 / 12.74 * 3.6).toFixed(1);
     const v95  = (vo2 * 0.95 / 12.74 * 3.6).toFixed(1);
     const vVO2 = (vo2        / 12.74 * 3.6).toFixed(1);
-    hintEl.textContent = `Flat-terrain zones at this VO₂max — green ≤ ${v75} km/h · yellow ${v75}–${v95} km/h · red > ${v95} km/h (VO₂max pace ≈ ${vVO2} km/h)`;
+    hintEl.textContent = 'Flat zones: green ≤ ' + v75 + ' km/h · yellow ' + v75 + '–' + v95 + ' km/h · red > ' + v95 + ' km/h (VO₂max pace ≈ ' + vVO2 + ' km/h)';
     hintEl.classList.remove('hidden');
   } else {
     hintEl.classList.add('hidden');
@@ -777,18 +806,15 @@ function updateVo2PaceHint() {
 }
 
 // ════════════════════════════════════════════════════════════════
-// RECALCULATE  (client-side physics + nutrition)
+// RECALCULATE
 // ════════════════════════════════════════════════════════════════
 function recalculate() {
   const p = getParams();
   if (!p) return;
-
   const smoothed = applySmoothing(rawIntervals, p.smoothing);
   computed = applyPhysics(smoothed, p);
-
   totalDistM = rawIntervals[rawIntervals.length - 1]?.d ?? 0;
   totalHours = totalDistM / 1000 / p.speedKmh;
-
   updateTargetIndication();
   updateSummary(p);
   updateFuel();
@@ -804,7 +830,8 @@ function getParams() {
   const win    = parseInt(document.getElementById('smoothing').value);
   const vo2max  = parseFloat(document.getElementById('vo2max').value)    || 0;
   const hypoxia = document.getElementById('hypoxia-toggle').checked;
-
+  const ftp         = parseFloat(document.getElementById('ftp').value) || 0;
+  const ftpPriority = document.getElementById('ftp-priority').checked;
   let speedKmh;
   if (document.querySelector('input[name="target-type"][value="speed"]').checked) {
     speedKmh = parseFloat(document.getElementById('target-speed').value) || 30;
@@ -815,14 +842,11 @@ function getParams() {
     const km  = (rawIntervals?.[rawIntervals.length - 1]?.d ?? 0) / 1000;
     speedKmh  = hrs > 0 && km > 0 ? km / hrs : 30;
   }
-
-  const ftp         = parseFloat(document.getElementById('ftp').value) || 0;
-  const ftpPriority = document.getElementById('ftp-priority').checked;
   return { mass: body + kit, bodyWeight: body, eff, carbs, smoothing: win, speedKmh, vo2max, hypoxia, ftp, ftpPriority };
 }
 
 // ════════════════════════════════════════════════════════════════
-// SMOOTHING  (moving average on elevations → recalc gradients)
+// SMOOTHING
 // ════════════════════════════════════════════════════════════════
 function applySmoothing(intervals, win) {
   const eles = intervals.map(iv => iv.e);
@@ -830,7 +854,7 @@ function applySmoothing(intervals, win) {
   return intervals.map((iv, i) => {
     const nextE  = i < intervals.length - 1 ? sm[i + 1] : sm[i];
     const segLen = i < intervals.length - 1 ? intervals[i + 1].d - iv.d : 100;
-    const grad   = segLen > 0 ? (nextE - sm[i]) / segLen : 0; // dimensionless
+    const grad   = segLen > 0 ? (nextE - sm[i]) / segLen : 0;
     return { d: iv.d, e: sm[i], g: grad };
   });
 }
@@ -848,40 +872,28 @@ function movingAvg(arr, win) {
 }
 
 // ════════════════════════════════════════════════════════════════
-// HYPOXIA MODEL  (per specification)
+// HYPOXIA
 // ════════════════════════════════════════════════════════════════
 function applyAltitudeHypoxia(wmaxBase, elevationMeters) {
-  let adjustedWMax = wmaxBase;
-  let metabolicMultiplier = 1.0;
+  let adjustedWMax = wmaxBase, metabolicMultiplier = 1.0;
   if (elevationMeters > 1500) {
-    const metersAboveThreshold = elevationMeters - 1500;
-    const penaltyPercentage = (metersAboveThreshold / 100) * 0.01;
-    adjustedWMax = wmaxBase * (1 - penaltyPercentage);
-    if (elevationMeters > 1800) {
-      metabolicMultiplier = 1.05;
-    }
+    const above = elevationMeters - 1500;
+    adjustedWMax = wmaxBase * (1 - (above / 100) * 0.01);
+    if (elevationMeters > 1800) metabolicMultiplier = 1.05;
   }
   return { adjustedWMax, metabolicMultiplier };
 }
 
 // ════════════════════════════════════════════════════════════════
-// PHYSICS ENGINE  (100 m interval model)
+// PHYSICS ENGINE
 // ════════════════════════════════════════════════════════════════
 function applyPhysics(intervals, p) {
-  const v  = p.speedKmh / 3.6;  // m/s
-  const g  = 9.81;
-  const m  = p.mass;
+  const v = p.speedKmh / 3.6, g = 9.81, m = p.mass;
   const distTotal = intervals[intervals.length - 1]?.d ?? 0;
-  const hrs = distTotal / 1000 / p.speedKmh;
-  const carbsTotal = p.carbs * hrs;
+  const carbsTotal = p.carbs * (distTotal / 1000 / p.speedKmh);
 
-  // Aerobic ceiling: W_max = (VO2Max [ml/kg/min] × BW [kg] × 20.1 [J/ml O₂] × eff) / 60 [s/min] → Watts
-  baseWMax = p.vo2max > 0
-    ? (p.vo2max * p.bodyWeight * 20.1 * p.eff) / 60
-    : 0;
+  baseWMax = p.vo2max > 0 ? (p.vo2max * p.bodyWeight * 20.1 * p.eff) / 60 : 0;
 
-  // Active threshold for zone classification:
-  // FTP (if priority flag set) OR 80% of W_max (standard FTP estimate from VO2Max)
   const useFTP = p.ftp > 0 && p.ftpPriority;
   const thresholdBase = useFTP ? p.ftp : (baseWMax > 0 ? baseWMax * 0.80 : 0);
   baseFTP = thresholdBase;
@@ -890,21 +902,14 @@ function applyPhysics(intervals, p) {
   let kcalCum = 0, carbsCum = 0;
 
   return intervals.map((iv, i) => {
-    const slope  = iv.g;  // dimensionless rise/run
+    const slope  = iv.g;
     const segLen = i < intervals.length - 1 ? intervals[i + 1].d - iv.d : 100;
-
-    // Altitude-adjusted threshold & metabolic cost multiplier
-    // Same ~1%/100m power-drop logic applies to FTP and W_max alike (Alpine Factor)
-    let adjTh   = thresholdBase;
-    let metMult = 1.0;
+    let adjTh = thresholdBase, metMult = 1.0;
     if (p.hypoxia && thresholdBase > 0) {
       const hyp = applyAltitudeHypoxia(thresholdBase, iv.e);
-      adjTh   = hyp.adjustedWMax;
-      metMult = hyp.metabolicMultiplier;
+      adjTh = hyp.adjustedWMax; metMult = hyp.metabolicMultiplier;
     }
-
     let watts = 0, kcalSeg = 0;
-
     if (sport === 'cycling') {
       const pGrav = m * g * v * slope;
       const pRoll = 0.004 * m * g * v;
@@ -913,35 +918,23 @@ function applyPhysics(intervals, p) {
       const timeSeg = v > 0 ? segLen / v : 0;
       kcalSeg = (watts * timeSeg / 1000) / 4.184 / p.eff * metMult;
     } else {
-      // Running base energy; keep mechanical watts independent of metMult
       const baseKcal = m * (segLen / 1000) * 1.02;
       kcalSeg = baseKcal * metMult;
       const timeSeg = v > 0 ? segLen / v : 0;
       watts = timeSeg > 0 ? (baseKcal * 4184 * p.eff) / timeSeg : 0;
     }
-
     kcalCum += kcalSeg;
-    const carbsSeg = distTotal > 0 ? carbsTotal * (segLen / distTotal) : 0;
-    carbsCum += carbsSeg;
-
-    // 4-Zone Coggan classification (ratio vs altitude-adjusted threshold)
-    // Z1 Recovery/Endurance: < 75% | Z2 Tempo: 75–95% | Z3 Threshold: 95–105% | Z4 Anaerobic: >105%
+    carbsCum += distTotal > 0 ? carbsTotal * (segLen / distTotal) : 0;
     const ratio = adjTh > 0 ? watts / adjTh : 0;
-    const zone  = ratio > 1.05 ? 'red'
-                : ratio >= 0.95 ? 'yellow'
-                : ratio >= 0.75 ? 'green'
-                : 'blue';
-
+    const zone  = ratio > 1.05 ? 'red' : ratio >= 0.95 ? 'yellow' : ratio >= 0.75 ? 'green' : 'blue';
     return {
-      d:  iv.d,
-      e:  iv.e,
-      g:  iv.g * 100,                         // gradient %
-      w:  Math.round(watts * 10) / 10,
-      k:  Math.round(kcalCum * 10) / 10,
-      c:  Math.round(carbsCum * 10) / 10,
-      z:  zone,                               // intensity zone
-      r:  Math.round(ratio * 1000) / 1000,    // intensity ratio vs threshold
-      wm: Math.round(adjTh),                  // altitude-adjusted threshold at this segment
+      d: iv.d, e: iv.e, g: iv.g * 100,
+      w: Math.round(watts * 10) / 10,
+      k: Math.round(kcalCum * 10) / 10,
+      c: Math.round(carbsCum * 10) / 10,
+      z: zone,
+      r: Math.round(ratio * 1000) / 1000,
+      wm: Math.round(adjTh),
     };
   });
 }
@@ -954,7 +947,6 @@ function fmtDur(s) {
   const m = Math.floor(s / 60), sec = Math.round(s % 60);
   return '~' + m + 'm' + (sec > 0 ? ' ' + sec + 's' : '');
 }
-
 function showError(msg) {
   const el = document.getElementById('error-msg');
   el.textContent = '⚠ ' + msg;
@@ -966,36 +958,25 @@ function showError(msg) {
 // ════════════════════════════════════════════════════════════════
 function updateSummary(p) {
   const distKm = totalDistM / 1000;
-  const hh = Math.floor(totalHours);
-  const mm = Math.round((totalHours - hh) * 60);
+  const hh = Math.floor(totalHours), mm = Math.round((totalHours - hh) * 60);
   const last = computed[computed.length - 1];
-  const elevGain = computed.reduce((acc, r, i) => {
-    if (i === 0) return acc;
-    const d = computed[i].e - computed[i - 1].e;
-    return acc + (d > 0 ? d : 0);
-  }, 0);
+  const elevGain = computed.reduce((acc, r, i) => i === 0 ? acc : acc + (computed[i].e - computed[i-1].e > 0 ? computed[i].e - computed[i-1].e : 0), 0);
   const avgW = computed.reduce((s, r) => s + r.w, 0) / (computed.length || 1);
-
-  // Max power + sustained duration at ≥ 90 % of peak
   const maxRow = computed.reduce((best, r) => r.w > best.w ? r : best, computed[0]);
-  const maxW   = maxRow?.w ?? 0;
-  const maxG   = maxRow?.g ?? 0;
-  const vMs    = p.speedKmh / 3.6;
-  const thr    = maxW * 0.9;
+  const maxW = maxRow?.w ?? 0, maxG = maxRow?.g ?? 0;
+  const vMs = p.speedKmh / 3.6, thr = maxW * 0.9;
   let bestDurS = 0, curDurS = 0;
   for (let i = 0; i < computed.length; i++) {
-    const sl = i < computed.length - 1 ? computed[i + 1].d - computed[i].d : 100;
+    const sl = i < computed.length - 1 ? computed[i+1].d - computed[i].d : 100;
     if (computed[i].w >= thr) { curDurS += vMs > 0 ? sl / vMs : 0; }
     else { if (curDurS > bestDurS) bestDurS = curDurS; curDurS = 0; }
   }
   if (curDurS > bestDurS) bestDurS = curDurS;
 
-  // Zone 4 distance (Anaerobic — only meaningful when threshold is set)
   let redDistM = 0;
   for (let i = 0; i < computed.length; i++) {
-    if (computed[i].z === 'red') {
-      redDistM += (i < computed.length - 1 ? computed[i + 1].d - computed[i].d : 100);
-    }
+    if (computed[i].z === 'red')
+      redDistM += (i < computed.length - 1 ? computed[i+1].d - computed[i].d : 100);
   }
   redDistFraction = totalDistM > 0 ? redDistM / totalDistM : 0;
 
@@ -1008,23 +989,19 @@ function updateSummary(p) {
   document.getElementById('s-maxpower-grad').textContent = 'at ' + maxG.toFixed(1) + '% grade';
   document.getElementById('s-maxpower-dur').textContent  = 'sustained ' + fmtDur(bestDurS);
 
-  // Zone 4 (Anaerobic) vulnerability bar — visible when threshold is active
   const rzBar = document.getElementById('redzone-bar');
   if (baseFTP > 0) {
     rzBar.classList.remove('hidden');
     document.getElementById('s-redzone-dist').textContent = (redDistM / 1000).toFixed(1) + ' km';
     document.getElementById('s-redzone-pct').textContent  = Math.round(redDistFraction * 100) + '% of route';
-  } else {
-    rzBar.classList.add('hidden');
-  }
+  } else { rzBar.classList.add('hidden'); }
 
   // Zone time breakdown
   const zoneRow = document.getElementById('zone-time-row');
   if (baseFTP > 0) {
-    const vMs = p.speedKmh / 3.6;
     const zt = { blue: 0, green: 0, yellow: 0, red: 0 };
     for (let i = 0; i < computed.length; i++) {
-      const segLen = i < computed.length - 1 ? computed[i + 1].d - computed[i].d : 100;
+      const segLen = i < computed.length - 1 ? computed[i+1].d - computed[i].d : 100;
       zt[computed[i].z] = (zt[computed[i].z] || 0) + (vMs > 0 ? segLen / vMs : 0);
     }
     const totalT = zt.blue + zt.green + zt.yellow + zt.red;
@@ -1037,18 +1014,14 @@ function updateSummary(p) {
       document.getElementById('s-' + id + '-time').textContent = fmtT(t);
       document.getElementById('s-' + id + '-pct').textContent  = totalT > 0 ? Math.round(t / totalT * 100) + '%' : '—';
     });
-    zoneRow.classList.remove('hidden');
-    zoneRow.classList.add('grid');
-  } else {
-    zoneRow.classList.add('hidden');
-    zoneRow.classList.remove('grid');
-  }
+    zoneRow.classList.remove('hidden'); zoneRow.classList.add('grid');
+  } else { zoneRow.classList.add('hidden'); zoneRow.classList.remove('grid'); }
 
   document.getElementById('summary-section').classList.remove('hidden');
 }
 
 // ════════════════════════════════════════════════════════════════
-// FUEL DISPLAY  (instant, no server call)
+// FUEL
 // ════════════════════════════════════════════════════════════════
 function updateFuel() {
   const carbs  = parseInt(document.getElementById('hourly-carbs').value);
@@ -1056,230 +1029,176 @@ function updateFuel() {
   const barPct = +document.getElementById('bars-pct').value / 100;
   const gelPct = +document.getElementById('gels-pct').value / 100;
   const isoPct = +document.getElementById('iso-pct').value  / 100;
-
   const bars = Math.ceil((total * barPct) / 30);
   const gels = Math.ceil((total * gelPct) / 25);
   const iso  = Math.ceil((total * isoPct) / 30);
-
   document.getElementById('f-carbs').textContent = total + ' g';
   document.getElementById('f-bars').textContent  = bars + (bars === 1 ? ' bar'    : ' bars');
   document.getElementById('f-gels').textContent  = gels + (gels === 1 ? ' gel'    : ' gels');
   document.getElementById('f-iso').textContent   = iso  + (iso  === 1 ? ' bottle' : ' bottles');
 
-  // High-intensity nutrition advisory: Zone 3+4 triggers gel/liquid shift
-  // At threshold+ intensity, blood is diverted from the gut — solid bars become hard to digest
   const advisory = document.getElementById('zone-advisory');
   if (baseFTP > 0) {
-    // Compute fraction of route in Zone 3 (threshold) + Zone 4 (anaerobic)
     let highIntDistM = 0;
     if (computed) {
       for (let i = 0; i < computed.length; i++) {
         if (computed[i].z === 'yellow' || computed[i].z === 'red') {
-          highIntDistM += (i < computed.length - 1 ? computed[i + 1].d - computed[i].d : 100);
+          highIntDistM += (i < computed.length - 1 ? computed[i+1].d - computed[i].d : 100);
         }
       }
     }
     const highIntFraction = totalDistM > 0 ? highIntDistM / totalDistM : 0;
-
     if (highIntFraction > 0.15) {
       const pct = Math.round(highIntFraction * 100);
-      const isHighlyAnaerobic = redDistFraction > 0.10;  // >10% Zone 4
+      const isHighlyAnaerobic = redDistFraction > 0.10;
       const recGel = isHighlyAnaerobic ? 100 : Math.min(80, Math.max(Math.round(gelPct * 100), 60));
       const recIso = isHighlyAnaerobic ? 0  : Math.round(isoPct * 100);
       const recBar = Math.max(0, 100 - recGel - recIso);
-      const zone34label = isHighlyAnaerobic
-        ? 'Over ' + Math.round(redDistFraction * 100) + '% of the route is Zone 4 (Anaerobic). At this intensity, gastric emptying nearly stops — switch to 100% gels/liquids only.'
-        : pct + '% of the route is at Threshold or above (Zone 3–4). Blood is diverted from the gut at high intensity — recommend ~' + recGel + '% Gels / ~' + recBar + '% Bars / ~' + recIso + '% Iso to reduce GI risk.';
-      document.getElementById('zone-advisory-text').textContent = zone34label;
+      document.getElementById('zone-advisory-text').textContent = isHighlyAnaerobic
+        ? 'Over ' + Math.round(redDistFraction*100) + '% is Zone 4. Gastric emptying nearly stops — switch to 100% gels/liquids.'
+        : pct + '% of the route is at Threshold or above (Z3–4). Recommend ~' + recGel + '% Gels / ~' + recBar + '% Bars / ~' + recIso + '% Iso.';
       advisory.classList.remove('hidden');
-    } else {
-      advisory.classList.add('hidden');
-    }
-  } else {
-    advisory.classList.add('hidden');
-  }
+    } else { advisory.classList.add('hidden'); }
+  } else { advisory.classList.add('hidden'); }
 }
 
 // ════════════════════════════════════════════════════════════════
-// CANVAS CHART  (intensity-zone heatmap when VO2Max is set)
+// CHART
 // ════════════════════════════════════════════════════════════════
 function renderChart(data) {
   const canvas = document.getElementById('chart-canvas');
   document.getElementById('chart-placeholder').classList.add('hidden');
   canvas.classList.remove('hidden');
-
   const dpr = window.devicePixelRatio || 1;
-  const W   = canvas.parentElement.clientWidth - 32;
-  const H   = 280;
-  canvas.width  = W * dpr;
-  canvas.height = H * dpr;
-  canvas.style.width  = W + 'px';
-  canvas.style.height = H + 'px';
-
+  const W = canvas.parentElement.clientWidth - 32, H = 280;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
-
   const pL = 56, pR = 56, pT = 12, pB = 34;
-  const cW = W - pL - pR;
-  const cH = H - pT - pB;
-
-  const maxD  = data[data.length - 1]?.d ?? 1;
-  const eles  = data.map(r => r.e);
-  const watts = data.map(r => r.w);
-  const minE  = Math.min(...eles), maxE = Math.max(...eles);
-  const eRng  = (maxE - minE) || 1;
-
-  // Ensure threshold ceiling fits inside the chart scale
-  const allW  = baseFTP > 0 ? [...watts, baseFTP] : watts;
-  const maxW  = (Math.max(...allW) || 1) * 1.15;
-
+  const cW = W - pL - pR, cH = H - pT - pB;
+  const maxD = data[data.length-1]?.d ?? 1;
+  const eles = data.map(r => r.e), watts = data.map(r => r.w);
+  const minE = Math.min(...eles), maxE = Math.max(...eles), eRng = (maxE - minE) || 1;
+  const allW = baseFTP > 0 ? [...watts, baseFTP] : watts;
+  const maxW = (Math.max(...allW) || 1) * 1.15;
   const toX  = d => pL + (d / maxD) * cW;
   const toYe = e => pT + cH - ((e - minE) / eRng) * cH;
   const toYw = w => pT + cH - (w / maxW) * cH;
 
   // Background
-  ctx.fillStyle = '#111827';
-  ctx.fillRect(0, 0, W, H);
-
+  ctx.fillStyle = '#FAFAFA'; ctx.fillRect(0, 0, W, H);
   // Grid
-  ctx.strokeStyle = '#1f2937';
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = '#D8CCBE'; ctx.lineWidth = 1;
   for (let i = 0; i <= 4; i++) {
     const y = pT + cH * i / 4;
     ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(pL + cW, y); ctx.stroke();
   }
-
   // Elevation fill
   ctx.beginPath();
   ctx.moveTo(toX(data[0].d), pT + cH);
   for (const r of data) ctx.lineTo(toX(r.d), toYe(r.e));
-  ctx.lineTo(toX(data[data.length - 1].d), pT + cH);
+  ctx.lineTo(toX(data[data.length-1].d), pT + cH);
   ctx.closePath();
   const grd = ctx.createLinearGradient(0, pT, 0, pT + cH);
-  grd.addColorStop(0, 'rgba(56,189,248,0.45)');
-  grd.addColorStop(1, 'rgba(56,189,248,0.04)');
-  ctx.fillStyle = grd;
-  ctx.fill();
-
+  grd.addColorStop(0, 'rgba(61,139,110,0.25)');
+  grd.addColorStop(1, 'rgba(61,139,110,0.04)');
+  ctx.fillStyle = grd; ctx.fill();
   // Elevation outline
   ctx.beginPath();
   data.forEach((r, i) => { i === 0 ? ctx.moveTo(toX(r.d), toYe(r.e)) : ctx.lineTo(toX(r.d), toYe(r.e)); });
-  ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.strokeStyle = '#3D8B6E'; ctx.lineWidth = 1.5; ctx.stroke();
 
   if (baseFTP > 0) {
-    // ── 4-zone power line (segment by segment) ────────────────
-    // Z1 blue · Z2 green · Z3 yellow · Z4 red
-    const zColor = { blue: '#3b82f6', green: '#22c55e', yellow: '#eab308', red: '#ef4444' };
+    const zColor = { blue: '#3b82f6', green: '#3D8B6E', yellow: '#E8C547', red: '#ef4444' };
     ctx.lineWidth = 2;
     for (let i = 0; i < data.length - 1; i++) {
       ctx.beginPath();
-      ctx.moveTo(toX(data[i].d),     toYw(data[i].w));
-      ctx.lineTo(toX(data[i + 1].d), toYw(data[i + 1].w));
-      ctx.strokeStyle = zColor[data[i].z] || '#f97316';
+      ctx.moveTo(toX(data[i].d), toYw(data[i].w));
+      ctx.lineTo(toX(data[i+1].d), toYw(data[i+1].w));
+      ctx.strokeStyle = zColor[data[i].z] || '#3D8B6E';
       ctx.stroke();
     }
-
-    // ── Altitude-adjusted threshold ceiling (dashed amber — "Shrinking Threshold") ─
     ctx.setLineDash([5, 4]);
-    ctx.strokeStyle = 'rgba(251,191,36,0.65)';
+    ctx.strokeStyle = 'rgba(232,197,71,0.8)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     data.forEach((r, i) => {
       const y = toYw(r.wm > 0 ? r.wm : baseFTP);
       i === 0 ? ctx.moveTo(toX(r.d), y) : ctx.lineTo(toX(r.d), y);
     });
-    ctx.stroke();
-    ctx.setLineDash([]);
+    ctx.stroke(); ctx.setLineDash([]);
   } else {
-    // ── Plain orange power line (no threshold set) ─────────────
     ctx.beginPath();
     data.forEach((r, i) => { i === 0 ? ctx.moveTo(toX(r.d), toYw(r.w)) : ctx.lineTo(toX(r.d), toYw(r.w)); });
-    ctx.strokeStyle = '#f97316'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.strokeStyle = '#3D8B6E'; ctx.lineWidth = 1.5; ctx.stroke();
   }
 
   // X axis labels
-  ctx.fillStyle = '#4b5563'; ctx.font = '10px system-ui, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#7B8B8C'; ctx.font = '10px "DM Sans", system-ui'; ctx.textAlign = 'center';
   for (let i = 0; i <= 6; i++) {
     const d = maxD * i / 6;
     ctx.fillText((d / 1000).toFixed(1) + ' km', toX(d), H - pB + 14);
   }
-
   // Left Y (elevation)
-  ctx.textAlign = 'right'; ctx.fillStyle = '#38bdf8';
+  ctx.textAlign = 'right'; ctx.fillStyle = '#3D8B6E';
   for (let i = 0; i <= 4; i++) {
     const e = minE + eRng * i / 4;
     ctx.fillText(Math.round(e) + ' m', pL - 6, toYe(e) + 3.5);
   }
-
   // Right Y (watts)
-  ctx.textAlign = 'left'; ctx.fillStyle = '#9ca3af';
+  ctx.textAlign = 'left'; ctx.fillStyle = '#7B8B8C';
   for (let i = 0; i <= 4; i++) {
     const w = maxW * i / 4;
     ctx.fillText(Math.round(w) + ' W', pL + cW + 6, toYw(w) + 3.5);
   }
 
-  // Dynamic legend
+  // Legend
   const legendEl = document.getElementById('chart-legend');
   legendEl.classList.remove('hidden');
+  legendEl.classList.add('flex');
   if (baseFTP > 0) {
     legendEl.innerHTML =
-      '<span class="flex items-center gap-1.5 text-xs text-sky-400">' +
-        '<span class="inline-block w-3 h-3 rounded-sm" style="background:rgba(56,189,248,0.4)"></span>Elevation' +
-      '</span>' +
-      '<span class="flex items-center gap-1.5 text-xs text-blue-400">' +
-        '<span class="inline-block w-4 h-0.5 bg-blue-400 rounded"></span>Z1 Recovery' +
-      '</span>' +
-      '<span class="flex items-center gap-1.5 text-xs text-green-400">' +
-        '<span class="inline-block w-4 h-0.5 bg-green-400 rounded"></span>Z2 Tempo' +
-      '</span>' +
-      '<span class="flex items-center gap-1.5 text-xs text-yellow-400">' +
-        '<span class="inline-block w-4 h-0.5 bg-yellow-400 rounded"></span>Z3 Threshold' +
-      '</span>' +
-      '<span class="flex items-center gap-1.5 text-xs text-red-400">' +
-        '<span class="inline-block w-4 h-0.5 bg-red-400 rounded"></span>Z4 Anaerobic' +
-      '</span>' +
-      '<span class="flex items-center gap-1.5 text-xs text-amber-400/70">' +
-        '<span class="inline-block w-5 border-t border-dashed border-amber-400/70 mt-px"></span>' + thresholdLabel +
-      '</span>';
+      '<span class="flex items-center gap-1.5 text-xs text-brand-accent"><span class="inline-block w-3 h-3 rounded-sm" style="background:rgba(61,139,110,0.25)"></span>Elevation</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-blue-500"><span class="inline-block w-4 h-0.5 bg-blue-500 rounded"></span>Z1 Recovery</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-brand-accent"><span class="inline-block w-4 h-0.5 rounded" style="background:#3D8B6E"></span>Z2 Tempo</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-yellow-600"><span class="inline-block w-4 h-0.5 rounded" style="background:#E8C547"></span>Z3 Threshold</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-red-500"><span class="inline-block w-4 h-0.5 bg-red-500 rounded"></span>Z4 Anaerobic</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-yellow-600/70"><span class="inline-block w-5 border-t border-dashed mt-px" style="border-color:#E8C547"></span>' + thresholdLabel + '</span>';
   } else {
     legendEl.innerHTML =
-      '<span class="flex items-center gap-1.5 text-xs text-sky-400">' +
-        '<span class="inline-block w-3 h-3 rounded-sm" style="background:rgba(56,189,248,0.4)"></span>Elevation' +
-      '</span>' +
-      '<span class="flex items-center gap-1.5 text-xs text-orange-400">' +
-        '<span class="inline-block w-4 h-0.5 bg-orange-400 rounded"></span>Power' +
-      '</span>';
+      '<span class="flex items-center gap-1.5 text-xs text-brand-accent"><span class="inline-block w-3 h-3 rounded-sm" style="background:rgba(61,139,110,0.25)"></span>Elevation</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-brand-accent"><span class="inline-block w-4 h-0.5 rounded" style="background:#3D8B6E"></span>Power</span>';
   }
 }
 
-// Redraw on window resize
 window.addEventListener('resize', () => { if (computed) renderChart(computed); });
 
 // ════════════════════════════════════════════════════════════════
 // TABLE
 // ════════════════════════════════════════════════════════════════
 function updateTable(data) {
-  const tbody    = document.getElementById('table-body');
+  const tbody = document.getElementById('table-body');
   const hasZones = baseFTP > 0;
   tbody.innerHTML = '';
   data.slice(0, 50).forEach(r => {
-    const gradClass = r.g > 6 ? 'text-red-400' : r.g < -4 ? 'text-sky-400' : 'text-gray-300';
+    const gradClass = r.g > 6 ? 'text-red-500' : r.g < -4 ? 'text-blue-500' : 'text-brand-primary';
     const zoneBadge = hasZones
-      ? { blue:   '<span class="text-blue-400">● <span class="text-blue-600 font-medium">Z1</span></span>',
-          green:  '<span class="text-green-400">● <span class="text-green-600 font-medium">Z2</span></span>',
-          yellow: '<span class="text-yellow-400">● <span class="text-yellow-600 font-medium">Z3</span></span>',
-          red:    '<span class="text-red-400">● <span class="text-red-600 font-medium">Z4</span></span>' }[r.z] ?? '—'
+      ? { blue:   '<span class="text-blue-500">● <span class="text-blue-400 font-medium">Z1</span></span>',
+          green:  '<span class="text-brand-accent">● <span class="font-medium">Z2</span></span>',
+          yellow: '<span class="text-yellow-600">● <span class="font-medium">Z3</span></span>',
+          red:    '<span class="text-red-500">● <span class="font-medium">Z4</span></span>' }[r.z] ?? '—'
       : '—';
     const tr = document.createElement('tr');
-    tr.className = 'hover:bg-gray-800/30 transition-colors' + (r.z === 'red' && hasZones ? ' bg-red-950/10' : '');
+    tr.className = 'hover:bg-brand-surface/50 transition-colors' + (r.z === 'red' && hasZones ? ' bg-red-50' : '');
     tr.innerHTML =
-      '<td class="py-1.5 pr-3 text-gray-500">'              + (r.d / 1000).toFixed(2) + ' km</td>' +
-      '<td class="py-1.5 pr-3 text-right text-gray-300">'   + r.e.toFixed(1)           + ' m</td>' +
-      '<td class="py-1.5 pr-3 text-right ' + gradClass + '">' + r.g.toFixed(1)         + '%</td>' +
-      '<td class="py-1.5 pr-3 text-right text-orange-300">' + r.w                      + ' W</td>' +
-      '<td class="py-1.5 pr-3 text-right text-gray-300">'   + r.k                      + '</td>' +
-      '<td class="py-1.5 pr-3 text-right text-green-400">'  + r.c                      + ' g</td>' +
-      '<td class="py-1.5 text-right">'                       + zoneBadge                + '</td>';
+      '<td class="py-1.5 pr-3 text-brand-muted">'              + (r.d/1000).toFixed(2) + ' km</td>' +
+      '<td class="py-1.5 pr-3 text-right text-brand-primary">' + r.e.toFixed(1)        + ' m</td>' +
+      '<td class="py-1.5 pr-3 text-right ' + gradClass + '">'  + r.g.toFixed(1)        + '%</td>' +
+      '<td class="py-1.5 pr-3 text-right text-brand-accent">'  + r.w                   + ' W</td>' +
+      '<td class="py-1.5 pr-3 text-right text-brand-primary">' + r.k                   + '</td>' +
+      '<td class="py-1.5 pr-3 text-right text-brand-accent">'  + r.c                   + ' g</td>' +
+      '<td class="py-1.5 text-right">'                          + zoneBadge             + '</td>';
     tbody.appendChild(tr);
   });
   document.getElementById('table-section').classList.remove('hidden');
@@ -1290,19 +1209,9 @@ function updateTable(data) {
 // ════════════════════════════════════════════════════════════════
 function exportCSV() {
   if (!computed) return;
-  const rows = ['Distance,Elevation,Gradient,Watts,Kcal_Cumulative,Carbs_Required,Zone,Intensity_Ratio,WMax_Adjusted'];
+  const rows = ['Distance,Elevation,Gradient,Watts,Kcal_Cumulative,Carbs_Required,Zone,Intensity_Ratio,Threshold_Adjusted'];
   computed.forEach(r => {
-    rows.push([
-      (r.d / 1000).toFixed(2),
-      r.e.toFixed(1),
-      r.g.toFixed(2),
-      r.w,
-      r.k,
-      r.c,
-      r.z,
-      r.r,
-      r.wm > 0 ? r.wm : '',
-    ].join(','));
+    rows.push([(r.d/1000).toFixed(2), r.e.toFixed(1), r.g.toFixed(2), r.w, r.k, r.c, r.z, r.r, r.wm > 0 ? r.wm : ''].join(','));
   });
   const a = Object.assign(document.createElement('a'), {
     href: URL.createObjectURL(new Blob([rows.join('\n')], { type: 'text/csv' })),
@@ -1312,24 +1221,8 @@ function exportCSV() {
 }
 
 // ════════════════════════════════════════════════════════════════
-// VIEW TOGGLE  (Race Analyzer ↔ Training Hub)
-// ════════════════════════════════════════════════════════════════
-function setView(v) {
-  const isTraining = v === 'training';
-  document.getElementById('view-race').classList.toggle('hidden', isTraining);
-  document.getElementById('view-training').classList.toggle('hidden', !isTraining);
-  const activeClass = 'px-3 py-1 rounded-md text-xs font-semibold transition-all bg-gray-700 text-white';
-  const idleClass   = 'px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white';
-  document.getElementById('btn-race').className     = !isTraining ? activeClass : idleClass;
-  document.getElementById('btn-training').className =  isTraining ? activeClass : idleClass;
-  if (isTraining) loadDashboard();
-}
-
-// ════════════════════════════════════════════════════════════════
 // TRAINING HUB
 // ════════════════════════════════════════════════════════════════
-
-// Set the webhook URL on load
 (function () {
   const el = document.getElementById('webhook-url');
   if (el) el.textContent = window.location.origin + '/api/sync-health';
@@ -1358,23 +1251,81 @@ async function saveProfile() {
 async function addEvent() {
   const name  = document.getElementById('ev-name').value.trim();
   const date  = document.getElementById('ev-date').value;
-  const sport = document.getElementById('ev-sport').value;
+  const evSport = document.getElementById('ev-sport').value;
   const dist  = parseFloat(document.getElementById('ev-dist').value) || 0;
+  const gpxFile = document.getElementById('ev-gpx').files[0];
   if (!name || !date) return;
-  await fetch('/api/events', {
+
+  const statusEl = document.getElementById('ev-status');
+  statusEl.textContent = gpxFile ? 'Uploading GPX...' : 'Saving event...';
+  statusEl.classList.remove('hidden');
+
+  const id = Date.now().toString();
+
+  // 1. Save event metadata
+  const evRes = await fetch('/api/events', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: Date.now().toString(), name, date, sport, distance_km: dist }),
+    body: JSON.stringify({ id, name, date, sport: evSport, distance_km: dist }),
   });
+  if (!evRes.ok) { statusEl.textContent = 'Failed to save event.'; return; }
+
+  // 2. If GPX file attached, parse it and store intervals
+  if (gpxFile) {
+    const fd = new FormData();
+    fd.append('file', gpxFile);
+    const parseRes = await fetch('/api/parse', { method: 'POST', body: fd });
+    const parseJson = await parseRes.json();
+    if (!parseRes.ok || parseJson.error) {
+      statusEl.textContent = 'Event saved, GPX parse failed: ' + parseJson.error;
+    } else {
+      await fetch('/api/events/' + id + '/gpx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intervals: parseJson.intervals }),
+      });
+      statusEl.textContent = '✓ Event + GPX saved (' + parseJson.intervals.length + ' intervals)';
+    }
+  } else {
+    statusEl.textContent = '✓ Event saved';
+  }
+
   document.getElementById('ev-name').value = '';
   document.getElementById('ev-date').value = '';
   document.getElementById('ev-dist').value = '';
+  document.getElementById('ev-gpx').value  = '';
+  setTimeout(() => statusEl.classList.add('hidden'), 3000);
   loadDashboard();
 }
 
 async function deleteEvent(id) {
   await fetch('/api/events/' + id, { method: 'DELETE' });
   loadDashboard();
+}
+
+async function openEventInRaceAnalyzer(eventId, eventName, eventSport) {
+  const res = await fetch('/api/events/' + eventId + '/gpx');
+  if (!res.ok) { alert('No GPX data attached to this event.'); return; }
+  const json = await res.json();
+  rawIntervals = json.intervals;
+  computed = null;
+  totalDistM = 0; totalHours = 0; baseWMax = 0; baseFTP = 0; redDistFraction = 0;
+
+  // Switch sport if needed
+  if (eventSport !== sport) setSport(eventSport);
+
+  // Show file source label
+  selectedFile = { name: eventName }; // mock so process-btn stays enabled
+  const disp = document.getElementById('filename-display');
+  disp.textContent = '✓ ' + eventName + ' (from event)';
+  disp.classList.remove('hidden');
+  const srcLabel = document.getElementById('event-source-label');
+  if (srcLabel) { srcLabel.textContent = 'Route loaded from event: ' + eventName; srcLabel.classList.remove('hidden'); }
+  document.getElementById('process-btn').disabled = false;
+
+  // Switch to Race Analyzer and calculate
+  setView('race');
+  recalculate();
 }
 
 async function loadDashboard() {
@@ -1396,26 +1347,19 @@ async function loadDashboard() {
   document.getElementById('training-dashboard').classList.remove('hidden');
 
   const s = data.state;
-
-  // Readiness
   const rpct = s.readiness_pct;
-  const rColor = rpct >= 80 ? 'text-green-400' : rpct >= 60 ? 'text-yellow-400' : 'text-red-400';
+  const rColor = rpct >= 80 ? 'text-brand-accent' : rpct >= 60 ? 'text-yellow-600' : 'text-red-500';
   const rLabel = rpct >= 80 ? 'High — go for it' : rpct >= 60 ? 'Moderate — train smart' : 'Low — recover first';
   document.getElementById('t-readiness').className = 'text-3xl font-bold ' + rColor;
   document.getElementById('t-readiness').textContent = rpct + '%';
   document.getElementById('t-readiness-label').textContent = rLabel;
-
-  // CTL / ATL / TSB
   document.getElementById('t-ctl').textContent = s.ctl.toFixed(1);
   document.getElementById('t-atl').textContent = s.atl.toFixed(1);
   const tsbEl = document.getElementById('t-tsb');
   tsbEl.textContent = (s.tsb > 0 ? '+' : '') + s.tsb;
-  tsbEl.className = 'text-2xl font-bold ' + (s.tsb > 0 ? 'text-green-400' : s.tsb < -20 ? 'text-red-400' : 'text-yellow-400');
-
-  // Burnout
+  tsbEl.className = 'text-2xl font-bold ' + (s.tsb > 0 ? 'text-brand-accent' : s.tsb < -20 ? 'text-red-500' : 'text-yellow-600');
   document.getElementById('burnout-alert').classList.toggle('hidden', !s.burnout_risk);
 
-  // WOD
   const wod = s.wod;
   document.getElementById('wod-label').textContent     = wod.label;
   document.getElementById('wod-desc').textContent      = wod.description;
@@ -1423,56 +1367,53 @@ async function loadDashboard() {
   document.getElementById('wod-duration').textContent  = wod.duration_min + ' min';
   document.getElementById('wod-intensity').textContent = wod.intensity_pct + '% of threshold';
 
-  // Advisory
   const advisory = data.advisory ?? [];
   const advSec = document.getElementById('advisory-section');
   if (advisory.length > 0) {
     advSec.classList.remove('hidden');
-    document.getElementById('advisory-list').innerHTML =
-      advisory.map(n => '<li>' + n + '</li>').join('');
-  } else {
-    advSec.classList.add('hidden');
-  }
+    document.getElementById('advisory-list').innerHTML = advisory.map(n => '<li>' + n + '</li>').join('');
+  } else { advSec.classList.add('hidden'); }
 
-  // Recent metrics table
   const tbody = document.getElementById('metrics-table');
   tbody.innerHTML = '';
   (data.metrics ?? []).slice(-14).reverse().forEach(m => {
     const tr = document.createElement('tr');
-    tr.className = 'hover:bg-gray-800/30 transition-colors';
+    tr.className = 'hover:bg-brand-surface/50 transition-colors';
     tr.innerHTML =
-      '<td class="py-1.5 pr-3 text-gray-500">'            + m.date + '</td>' +
-      '<td class="py-1.5 pr-3 text-right text-blue-300">' + (m.hrv_ms    ? m.hrv_ms + ' ms' : '—') + '</td>' +
-      '<td class="py-1.5 pr-3 text-right text-gray-300">' + (m.sleep_hours ? m.sleep_hours + 'h' : '—') + '</td>' +
-      '<td class="py-1.5 pr-3 text-right text-gray-300">' + (m.weight_kg  ? m.weight_kg + ' kg' : '—') + '</td>' +
-      '<td class="py-1.5 pr-3 text-right text-green-300">'+ (m.vo2_max   ? m.vo2_max : '—') + '</td>' +
-      '<td class="py-1.5 text-right text-orange-300">'    + (m.tss       ? m.tss : '—') + '</td>';
+      '<td class="py-1.5 pr-3 text-brand-muted">'              + m.date + '</td>' +
+      '<td class="py-1.5 pr-3 text-right text-blue-600">'      + (m.hrv_ms     ? m.hrv_ms + ' ms'    : '—') + '</td>' +
+      '<td class="py-1.5 pr-3 text-right text-brand-primary">' + (m.sleep_hours ? m.sleep_hours + 'h' : '—') + '</td>' +
+      '<td class="py-1.5 pr-3 text-right text-brand-primary">' + (m.weight_kg   ? m.weight_kg + ' kg' : '—') + '</td>' +
+      '<td class="py-1.5 pr-3 text-right text-brand-accent">'  + (m.vo2_max     ? m.vo2_max           : '—') + '</td>' +
+      '<td class="py-1.5 text-right text-orange-600">'         + (m.tss         ? m.tss               : '—') + '</td>';
     tbody.appendChild(tr);
   });
 
-  // TSS sparkline
   renderTSSChart(data.metrics ?? [], s);
 }
 
 function renderEventsList(events) {
   const el = document.getElementById('events-list');
   if (events.length === 0) {
-    el.innerHTML = '<p class="text-xs text-gray-700">No events added yet.</p>';
+    el.innerHTML = '<p class="text-xs text-brand-muted">No events added yet.</p>';
     return;
   }
   const now = new Date();
   el.innerHTML = events.map(ev => {
     const days = Math.round((new Date(ev.date).getTime() - now.getTime()) / 86400000);
-    const daysLabel = days < 0 ? 'Past' : days === 0 ? 'Today!' : days + 'd away';
+    const daysLabel = days < 0 ? 'Past' : days === 0 ? 'Today!' : days + 'd';
     const icon = ev.sport === 'cycling' ? '🚴' : '🏃';
-    return '<div class="flex items-center justify-between bg-gray-800 rounded-lg px-3 py-2">' +
-      '<div>' +
-        '<p class="text-xs font-medium text-white">' + icon + ' ' + ev.name + '</p>' +
-        '<p class="text-xs text-gray-600">' + ev.date + (ev.distance_km ? ' · ' + ev.distance_km + ' km' : '') + '</p>' +
+    const daysColor = days <= 7 && days >= 0 ? 'text-red-500' : days <= 21 ? 'text-yellow-600' : 'text-brand-accent';
+    return '<div class="flex items-center justify-between bg-brand-surface rounded-lg px-3 py-2">' +
+      '<div class="flex-1 min-w-0">' +
+        '<p class="text-xs font-medium text-brand-primary truncate">' + icon + ' ' + ev.name + '</p>' +
+        '<p class="text-xs text-brand-muted">' + ev.date + (ev.distance_km ? ' · ' + ev.distance_km + ' km' : '') + '</p>' +
       '</div>' +
-      '<div class="flex items-center gap-2">' +
-        '<span class="text-xs text-orange-400 font-mono">' + daysLabel + '</span>' +
-        '<button onclick="deleteEvent(\'' + ev.id + '\')" class="text-gray-700 hover:text-red-400 transition-colors text-xs">✕</button>' +
+      '<div class="flex items-center gap-2 ml-2 shrink-0">' +
+        '<span class="text-xs font-mono font-semibold ' + daysColor + '">' + daysLabel + '</span>' +
+        '<button onclick="openEventInRaceAnalyzer(\'' + ev.id + '\',\'' + ev.name.replace(/'/g, "\\'") + '\',\'' + ev.sport + '\')" ' +
+          'class="text-xs text-brand-accent hover:text-brand-hover transition-colors font-medium" title="Open in Race Analyzer">→</button>' +
+        '<button onclick="deleteEvent(\'' + ev.id + '\')" class="text-brand-muted hover:text-red-500 transition-colors text-xs">✕</button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -1482,77 +1423,52 @@ function renderTSSChart(metrics, state) {
   const canvas = document.getElementById('tss-chart');
   if (!canvas || metrics.length === 0) return;
   const dpr = window.devicePixelRatio || 1;
-  const W = canvas.parentElement.clientWidth - 32;
-  const H = 160;
-  canvas.width  = W * dpr;
-  canvas.height = H * dpr;
-  canvas.style.width  = W + 'px';
-  canvas.style.height = H + 'px';
+  const W = canvas.parentElement.clientWidth - 32, H = 160;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
-
-  const pL = 40, pR = 16, pT = 10, pB = 28;
+  const pL = 36, pR = 12, pT = 10, pB = 28;
   const cW = W - pL - pR, cH = H - pT - pB;
-
   const tssList = metrics.map(m => m.tss || 0);
-  const maxTSS  = Math.max(...tssList, 1) * 1.2;
+  const maxTSS = Math.max(...tssList, 1) * 1.2;
   const n = metrics.length;
-
-  ctx.fillStyle = '#111827';
-  ctx.fillRect(0, 0, W, H);
-
-  // Grid
-  ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 1;
+  ctx.fillStyle = '#FAFAFA'; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#D8CCBE'; ctx.lineWidth = 1;
   for (let i = 0; i <= 4; i++) {
     const y = pT + cH * i / 4;
     ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(pL + cW, y); ctx.stroke();
   }
-
-  const toX = i => pL + (i / Math.max(n - 1, 1)) * cW;
+  const toX = i => pL + (i / Math.max(n-1,1)) * cW;
   const toY = v => pT + cH - (v / maxTSS) * cH;
-
-  // TSS bars
   const barW = Math.max(2, cW / n - 1);
   tssList.forEach((v, i) => {
-    ctx.fillStyle = v > 100 ? '#f97316' : v > 60 ? '#eab308' : '#3b82f6';
-    ctx.fillRect(toX(i) - barW / 2, toY(v), barW, pT + cH - toY(v));
+    ctx.fillStyle = v > 100 ? '#E8C547' : v > 60 ? '#3D8B6E' : '#D8CCBE';
+    ctx.fillRect(toX(i) - barW/2, toY(v), barW, pT + cH - toY(v));
   });
-
-  // CTL line (recompute incrementally for chart)
-  const k42 = 2 / 43;
-  let ctl = tssList[0] || 0;
-  const ctlLine = tssList.map(v => { ctl = v * k42 + ctl * (1 - k42); return ctl; });
+  const k42 = 2/43; let ctl = tssList[0] || 0;
+  const ctlLine = tssList.map(v => { ctl = v * k42 + ctl * (1-k42); return ctl; });
   ctx.beginPath();
   ctlLine.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
-  ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.stroke();
-
-  // ATL line
-  const k7 = 2 / 8;
-  let atl = tssList[0] || 0;
-  const atlLine = tssList.map(v => { atl = v * k7 + atl * (1 - k7); return atl; });
+  ctx.strokeStyle = '#3D8B6E'; ctx.lineWidth = 2; ctx.stroke();
+  const k7 = 2/8; let atl = tssList[0] || 0;
+  const atlLine = tssList.map(v => { atl = v * k7 + atl * (1-k7); return atl; });
   ctx.beginPath();
   atlLine.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
-  ctx.strokeStyle = '#fb923c'; ctx.lineWidth = 1.5; ctx.stroke();
-
-  // X labels (first + every ~30 days)
-  ctx.fillStyle = '#4b5563'; ctx.font = '9px system-ui'; ctx.textAlign = 'center';
+  ctx.strokeStyle = '#E8C547'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle = '#7B8B8C'; ctx.font = '9px "DM Sans", system-ui'; ctx.textAlign = 'center';
   metrics.forEach((m, i) => {
-    if (i === 0 || i === n - 1 || i % 30 === 0) {
+    if (i === 0 || i === n-1 || i % 30 === 0)
       ctx.fillText(m.date.slice(5), toX(i), H - pB + 12);
-    }
   });
-
-  // Y axis
-  ctx.textAlign = 'right'; ctx.fillStyle = '#4b5563';
+  ctx.textAlign = 'right'; ctx.fillStyle = '#7B8B8C';
   for (let i = 0; i <= 4; i++) {
     const v = maxTSS * i / 4;
     ctx.fillText(Math.round(v), pL - 4, toY(v) + 3);
   }
-
-  // Legend
   ctx.textAlign = 'left';
-  ctx.fillStyle = '#60a5fa'; ctx.fillText('CTL', pL + 4, pT + 12);
-  ctx.fillStyle = '#fb923c'; ctx.fillText('ATL', pL + 30, pT + 12);
+  ctx.fillStyle = '#3D8B6E'; ctx.fillText('CTL', pL + 4, pT + 12);
+  ctx.fillStyle = '#E8C547'; ctx.fillText('ATL', pL + 30, pT + 12);
 }
 </script>
 </body>

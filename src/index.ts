@@ -139,6 +139,28 @@ app.delete('/api/events/:id', async (c) => {
   return c.json({ ok: true });
 });
 
+// ─── API: store GPX intervals for an event ────────────────────────────────────
+
+app.post('/api/events/:id/gpx', async (c) => {
+  const id = c.req.param('id');
+  const events = await loadEvents(c.env.ATHLETE_KV);
+  if (!events.find(e => e.id === id)) return c.json({ error: 'Event not found' }, 404);
+
+  const body = await c.req.json<{ intervals: unknown[] }>();
+  if (!body.intervals || !Array.isArray(body.intervals)) {
+    return c.json({ error: 'intervals array required' }, 400);
+  }
+  await c.env.ATHLETE_KV.put(`event-gpx:${id}`, JSON.stringify(body.intervals));
+  return c.json({ ok: true, count: body.intervals.length });
+});
+
+app.get('/api/events/:id/gpx', async (c) => {
+  const id = c.req.param('id');
+  const raw = await c.env.ATHLETE_KV.get(`event-gpx:${id}`);
+  if (!raw) return c.json({ error: 'No GPX data for this event' }, 404);
+  return c.json({ intervals: JSON.parse(raw) });
+});
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 async function loadMetrics(kv: KVNamespace): Promise<DailyMetric[]> {
