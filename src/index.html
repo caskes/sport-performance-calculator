@@ -131,13 +131,12 @@
               <option value="running">🏃 Running</option>
             </select>
           </div>
-          <input type="number" id="ev-dist" placeholder="Distance (km)" min="1" max="1000"
-            class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-xs focus:border-brand-accent focus:outline-none transition-colors text-brand-primary placeholder-brand-muted">
-          <!-- GPX file for this event -->
+          <!-- GPX file for this event — distance is derived from it -->
           <div>
             <label class="text-xs text-brand-muted block mb-1">Attach GPX / KML route (optional)</label>
-            <input type="file" id="ev-gpx" accept=".gpx,.kml"
+            <input type="file" id="ev-gpx" accept=".gpx,.kml" onchange="previewEventGpx(this)"
               class="w-full text-xs text-brand-muted file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-brand-surface file:text-brand-primary hover:file:bg-brand-border cursor-pointer">
+            <p id="ev-gpx-preview" class="hidden mt-1 text-xs text-brand-accent font-medium"></p>
           </div>
           <button onclick="addEvent()"
             class="w-full bg-brand-accent hover:bg-brand-hover text-white text-xs font-semibold py-2 rounded-lg transition-colors">
@@ -1248,52 +1247,85 @@ async function saveProfile() {
   });
 }
 
+async function previewEventGpx(input) {
+  const preview = document.getElementById('ev-gpx-preview');
+  const file = input.files[0];
+  if (!file) { preview.classList.add('hidden'); return; }
+  preview.textContent = 'Parsing…';
+  preview.classList.remove('hidden');
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const res = await fetch('/api/parse', { method: 'POST', body: fd });
+    const json = await res.json();
+    if (json.error) { preview.textContent = 'Parse error: ' + json.error; return; }
+    const distKm = (json.intervals[json.intervals.length - 1].d / 1000).toFixed(1);
+    preview.textContent = '✓ ' + distKm + ' km · ' + json.intervals.length + ' intervals';
+    input._parsedIntervals = json.intervals;
+    input._distKm = parseFloat(distKm);
+  } catch (e) {
+    preview.textContent = 'Parse error';
+  }
+}
+
 async function addEvent() {
-  const name  = document.getElementById('ev-name').value.trim();
-  const date  = document.getElementById('ev-date').value;
+  const name    = document.getElementById('ev-name').value.trim();
+  const date    = document.getElementById('ev-date').value;
   const evSport = document.getElementById('ev-sport').value;
-  const dist  = parseFloat(document.getElementById('ev-dist').value) || 0;
-  const gpxFile = document.getElementById('ev-gpx').files[0];
+  const gpxInput = document.getElementById('ev-gpx');
+  const gpxFile  = gpxInput.files[0];
   if (!name || !date) return;
 
   const statusEl = document.getElementById('ev-status');
-  statusEl.textContent = gpxFile ? 'Uploading GPX...' : 'Saving event...';
+  statusEl.textContent = 'Saving event...';
   statusEl.classList.remove('hidden');
 
-  const id = Date.now().toString();
+  // Parse GPX now if not already parsed via preview
+  let intervals = gpxInput._parsedIntervals || null;
+  let distKm    = gpxInput._distKm || 0;
 
-  // 1. Save event metadata
-  const evRes = await fetch('/api/events', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, name, date, sport: evSport, distance_km: dist }),
-  });
-  if (!evRes.ok) { statusEl.textContent = 'Failed to save event.'; return; }
-
-  // 2. If GPX file attached, parse it and store intervals
-  if (gpxFile) {
+  if (gpxFile && !intervals) {
+    statusEl.textContent = 'Parsing GPX…';
     const fd = new FormData();
     fd.append('file', gpxFile);
     const parseRes = await fetch('/api/parse', { method: 'POST', body: fd });
     const parseJson = await parseRes.json();
     if (!parseRes.ok || parseJson.error) {
-      statusEl.textContent = 'Event saved, GPX parse failed: ' + parseJson.error;
-    } else {
-      await fetch('/api/events/' + id + '/gpx', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ intervals: parseJson.intervals }),
-      });
-      statusEl.textContent = '✓ Event + GPX saved (' + parseJson.intervals.length + ' intervals)';
+      statusEl.textContent = 'GPX parse failed: ' + parseJson.error;
+      return;
     }
+    intervals = parseJson.intervals;
+    distKm = parseFloat((intervals[intervals.length - 1].d / 1000).toFixed(1));
+  }
+
+  const id = Date.now().toString();
+
+  // 1. Save event metadata (distance derived from GPX)
+  const evRes = await fetch('/api/events', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, name, date, sport: evSport, distance_km: distKm }),
+  });
+  if (!evRes.ok) { statusEl.textContent = 'Failed to save event.'; return; }
+
+  // 2. Store GPX intervals if present
+  if (intervals) {
+    await fetch('/api/events/' + id + '/gpx', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ intervals }),
+    });
+    statusEl.textContent = '✓ Event + GPX saved (' + distKm + ' km)';
   } else {
-    statusEl.textContent = '✓ Event saved';
+    statusEl.textContent = '✓ Event saved (no GPX)';
   }
 
   document.getElementById('ev-name').value = '';
   document.getElementById('ev-date').value = '';
-  document.getElementById('ev-dist').value = '';
-  document.getElementById('ev-gpx').value  = '';
+  gpxInput.value = '';
+  gpxInput._parsedIntervals = null;
+  gpxInput._distKm = 0;
+  document.getElementById('ev-gpx-preview').classList.add('hidden');
   setTimeout(() => statusEl.classList.add('hidden'), 3000);
   loadDashboard();
 }
