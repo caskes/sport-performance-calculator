@@ -37,6 +37,10 @@ export interface FitnessIntake {
   recent_vo2max_estimate?: number;
   avg_hrv_7day?: number;
   weekly_active_calories?: number;
+  body_weight_kg?: number;
+  gear_weight_kg?: number;
+  vo2max?: number;
+  ftp_w?: number;
 }
 
 export interface GoalSelection {

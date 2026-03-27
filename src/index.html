@@ -59,30 +59,23 @@
       <p class="text-xs text-brand-muted">Adaptive Multisport Training</p>
     </div>
     <div class="flex items-center gap-3">
-      <!-- Sport selector -->
-      <div class="flex bg-brand-surface rounded-lg p-1 gap-1">
-        <button id="btn-cycling" onclick="setSport('cycling')"
-          class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-brand-accent text-white">
-          🚴 Cycling
-        </button>
-        <button id="btn-running" onclick="setSport('running')"
-          class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary">
-          🏃 Running
-        </button>
-      </div>
       <!-- View selector -->
       <div class="flex bg-brand-surface rounded-lg p-1 gap-1">
         <button id="btn-plan" onclick="setView('goal')"
           class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-brand-primary text-white">
-          🎯 My Plan
+          📋 Intake
         </button>
-        <button id="btn-training" onclick="setView('training')"
+        <button id="btn-week" onclick="setView('week')"
           class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary">
-          🧬 Training Hub
+          📅 My Week
         </button>
         <button id="btn-race" onclick="setView('race')"
           class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary">
           📈 Race Analyzer
+        </button>
+        <button id="btn-training" onclick="setView('training')"
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary">
+          🧬 Training Hub
         </button>
       </div>
     </div>
@@ -592,6 +585,16 @@
             <p id="zone-advisory-text" class="text-yellow-600"></p>
           </div>
         </div>
+
+        <!-- Training Plan CTA -->
+        <div id="plan-cta" class="hidden mt-4 bg-gradient-to-r from-brand-hover to-brand-accent rounded-xl p-4 text-white">
+          <p class="text-sm font-bold mb-1">Ready to train for this?</p>
+          <p class="text-xs text-white/80 mb-3">Build a weekly training plan tailored to your gap analysis and race targets.</p>
+          <button onclick="openPlanBuilder()"
+            class="w-full bg-white text-brand-hover font-semibold text-sm py-2.5 rounded-lg hover:bg-white/90 transition-colors">
+            📅 Create Training Plan →
+          </button>
+        </div>
       </div>
 
       <!-- Data Table -->
@@ -852,14 +855,50 @@
         <input id="fi-fatigue" type="range" min="1" max="5" value="3" oninput="updateFatigueLabel(this.value)" class="w-full">
         <div class="flex justify-between text-xs text-brand-muted mt-1"><span>1 — Fresh</span><span>5 — Exhausted</span></div>
       </div>
+      <div class="bg-white border border-brand-border rounded-xl p-4">
+        <label class="text-xs font-semibold text-brand-muted uppercase tracking-widest block mb-3">Athlete dimensions</label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Body weight (kg)</label>
+            <input id="fi-body-weight" type="number" min="40" max="150" placeholder="e.g. 75" step="0.5"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+          <div>
+            <label id="fi-gear-label" class="text-xs text-brand-muted block mb-1">Bike + Kit weight (kg)</label>
+            <input id="fi-gear-weight" type="number" min="0" max="30" placeholder="e.g. 8" step="0.5"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+        </div>
+      </div>
+      <div class="bg-white border border-brand-border rounded-xl p-4">
+        <label class="text-xs font-semibold text-brand-muted uppercase tracking-widest block mb-3">Physiology <span class="normal-case font-normal text-brand-muted">(optional — from Apple Health or lab)</span></label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">VO₂ Max (ml/kg/min)</label>
+            <input id="fi-vo2max" type="number" min="20" max="100" placeholder="e.g. 48" step="1"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+            <p class="text-xs text-brand-muted mt-1">Rec 35–45 · Trained 45–60 · Elite 60+</p>
+          </div>
+          <div id="fi-ftp-wrap">
+            <label class="text-xs text-brand-muted block mb-1">FTP (Watts)</label>
+            <input id="fi-ftp" type="number" min="50" max="600" placeholder="e.g. 230" step="5"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+            <p class="text-xs text-brand-muted mt-1">Rec 150–200 · Trained 200–300 · Elite 300+</p>
+          </div>
+        </div>
+      </div>
     </div>
-    <details class="mt-4 bg-white border border-brand-border rounded-xl overflow-hidden">
-      <summary class="px-4 py-3 text-xs font-semibold text-brand-muted uppercase tracking-widest cursor-pointer hover:text-brand-primary select-none">
-        📱 Apple Shortcut Integration
-      </summary>
-      <div class="px-4 pb-4 border-t border-brand-border">
-        <p class="text-xs text-brand-muted mt-3 mb-2">POST to <code class="bg-brand-surface px-1.5 py-0.5 rounded text-brand-accent font-mono">/api/fitness-intake</code> from your Shortcut:</p>
-        <pre class="bg-brand-surface rounded-lg p-3 text-xs text-brand-primary overflow-x-auto font-mono leading-relaxed whitespace-pre">{
+    <div class="mt-4 bg-gradient-to-r from-brand-primary to-brand-hover rounded-xl p-4">
+      <div class="flex items-start gap-3">
+        <span class="text-xl shrink-0">📱</span>
+        <div class="flex-1">
+          <p class="text-xs font-bold text-white mb-1">Auto-fill with Apple Shortcut</p>
+          <p class="text-xs text-white/70 mb-3">Connect once — your weight, HRV, VO₂ Max and sleep sync automatically every day from Apple Health.</p>
+          <details class="text-xs">
+            <summary class="cursor-pointer text-white/80 hover:text-white transition-colors select-none font-medium">View setup instructions ▸</summary>
+            <div class="mt-3 bg-black/20 rounded-lg p-3">
+              <p class="text-white/70 mb-2">POST to <code class="bg-white/10 px-1.5 py-0.5 rounded text-white font-mono">/api/fitness-intake</code> from your Shortcut:</p>
+              <pre class="text-white/80 overflow-x-auto font-mono leading-relaxed whitespace-pre text-xs">{
   "date": "2026-03-27",
   "source": "apple-shortcut",
   "sport": "cycling",
@@ -869,14 +908,19 @@
   "longest_session_h": 3.5,
   "fatigue_level": 2,
   "age": 38,
+  "body_weight_kg": 75.2,
+  "gear_weight_kg": 8,
+  "vo2max": 52,
+  "ftp_w": 240,
   "resting_heart_rate": 52,
-  "recent_vo2max_estimate": 48,
-  "avg_hrv_7day": 58,
-  "weekly_active_calories": 3200
+  "avg_hrv_7day": 58
 }</pre>
-        <p class="text-xs text-brand-muted mt-2">Optional auth: <code class="bg-brand-surface px-1 rounded font-mono">X-Sync-Token: &lt;token&gt;</code></p>
+              <p class="text-white/60 mt-2">Optional auth: <code class="bg-white/10 px-1 rounded font-mono">X-Sync-Token: &lt;token&gt;</code></p>
+            </div>
+          </details>
+        </div>
       </div>
-    </details>
+    </div>
     <div class="flex gap-3 mt-5">
       <button onclick="setView('goal')"
         class="px-5 py-3 rounded-xl border border-brand-border text-xs font-semibold text-brand-muted hover:text-brand-primary transition-colors">
@@ -884,7 +928,7 @@
       </button>
       <button onclick="submitIntake()"
         class="flex-1 bg-brand-accent hover:bg-brand-hover text-white text-sm font-semibold py-3 rounded-xl transition-colors">
-        Analyze my fitness →
+        Continue to Gap Analysis →
       </button>
     </div>
   </div>
@@ -927,11 +971,110 @@
       <p id="gap-weeks-label" class="text-xs text-brand-muted mt-3"></p>
     </div>
     <div id="gap-metrics-list" class="space-y-3 mb-5"></div>
-    <button onclick="buildPlan()"
-      class="w-full bg-brand-hover hover:opacity-90 text-white text-sm font-semibold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2">
-      🏋️ Build my training plan
+    <button onclick="openRaceAnalyzerFromGap()"
+      class="w-full bg-brand-accent hover:bg-brand-hover text-white text-sm font-semibold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 mb-3">
+      📈 Analyze Route in Race Analyzer →
     </button>
-    <p class="text-center text-xs text-brand-muted mt-2">Adds your event to Training Hub with readiness tracking</p>
+    <button onclick="buildPlan()"
+      class="w-full border border-brand-border text-brand-muted hover:text-brand-primary text-sm font-medium py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+      🧬 Add event to Training Hub
+    </button>
+    <p class="text-center text-xs text-brand-muted mt-2">Race Analyzer shows power, energy and nutrition targets for your event</p>
+  </div>
+</div>
+
+<!-- ═══════ PLAN BUILDER ═══════ -->
+<div id="view-plan" class="hidden">
+  <div class="max-w-2xl mx-auto">
+    <div class="flex items-center gap-2 mb-6">
+      <span class="w-6 h-6 rounded-full bg-brand-surface text-brand-muted text-xs font-bold flex items-center justify-center cursor-pointer" onclick="setView('gap')">3</span>
+      <span class="text-xs text-brand-muted cursor-pointer" onclick="setView('gap')">Gap Analysis</span>
+      <div class="h-px flex-1 bg-brand-accent"></div>
+      <span class="w-6 h-6 rounded-full bg-brand-accent text-white text-xs font-bold flex items-center justify-center">4</span>
+      <span class="text-xs font-semibold text-brand-primary">Training Plan</span>
+      <div class="h-px flex-1 bg-brand-border"></div>
+      <span class="w-6 h-6 rounded-full bg-brand-surface text-brand-muted text-xs font-bold flex items-center justify-center">5</span>
+      <span class="text-xs text-brand-muted">My Week</span>
+    </div>
+    <h2 class="text-lg font-bold text-brand-primary font-display mb-1">Design your training mix</h2>
+    <p class="text-xs text-brand-muted mb-5">Select up to 3 sports and how often you can train each per week. Your primary event sport is pre-selected.</p>
+
+    <div id="plan-event-banner" class="mb-5 flex items-center gap-3 bg-brand-surface rounded-xl px-4 py-3">
+      <span id="plan-event-icon" class="text-lg">🚴</span>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold text-brand-primary truncate" id="plan-event-name">Event</p>
+        <p class="text-xs text-brand-muted" id="plan-event-meta">Target · weeks away</p>
+      </div>
+    </div>
+
+    <div class="space-y-3 mb-6" id="plan-sports-list">
+      <!-- Rendered by JS -->
+    </div>
+
+    <p id="plan-sport-limit" class="hidden text-xs text-brand-accent mb-3 text-center">Maximum 3 sports selected. Remove one to add another.</p>
+
+    <div class="flex gap-3">
+      <button onclick="setView('gap')"
+        class="px-5 py-3 rounded-xl border border-brand-border text-xs font-semibold text-brand-muted hover:text-brand-primary transition-colors">
+        ← Back
+      </button>
+      <button onclick="generateWeeklyPlan()"
+        class="flex-1 bg-brand-accent hover:bg-brand-hover text-white text-sm font-semibold py-3 rounded-xl transition-colors">
+        Generate My Week →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ WEEKLY PLAN ═══════ -->
+<div id="view-week" class="hidden">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-lg font-bold text-brand-primary font-display">Your Week 1</h2>
+        <p class="text-xs text-brand-muted" id="week-event-meta">Building toward your event</p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="setView('plan')"
+          class="px-3 py-2 rounded-xl border border-brand-border text-xs font-semibold text-brand-muted hover:text-brand-primary transition-colors">
+          ← Adjust Plan
+        </button>
+        <button onclick="setView('race')"
+          class="px-3 py-2 rounded-xl bg-brand-surface text-xs font-semibold text-brand-primary hover:bg-brand-border transition-colors">
+          📈 Race Analyzer
+        </button>
+      </div>
+    </div>
+
+    <!-- Week Grid -->
+    <div class="grid grid-cols-7 gap-2 mb-6" id="week-grid">
+      <!-- Rendered by JS -->
+    </div>
+
+    <!-- Weekly TSS summary -->
+    <div class="grid grid-cols-3 gap-3 mb-6">
+      <div class="bg-white border border-brand-border rounded-xl p-3 shadow-sm text-center">
+        <p class="text-xs text-brand-muted mb-0.5">Weekly TSS</p>
+        <p id="week-tss" class="text-xl font-bold text-brand-primary">—</p>
+      </div>
+      <div class="bg-white border border-brand-border rounded-xl p-3 shadow-sm text-center">
+        <p class="text-xs text-brand-muted mb-0.5">Training Hours</p>
+        <p id="week-hours" class="text-xl font-bold text-brand-primary">—</p>
+      </div>
+      <div class="bg-white border border-brand-border rounded-xl p-3 shadow-sm text-center">
+        <p class="text-xs text-brand-muted mb-0.5">Sessions</p>
+        <p id="week-sessions" class="text-xl font-bold text-brand-primary">—</p>
+      </div>
+    </div>
+
+    <!-- Metric Projections -->
+    <div class="bg-white border border-brand-border rounded-xl p-5 shadow-sm">
+      <h3 class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-4 font-display">How this gets you to your goal</h3>
+      <div id="week-projections" class="space-y-4">
+        <!-- Rendered by JS -->
+      </div>
+      <p class="text-xs text-brand-muted mt-4 text-center">Projections are estimates based on consistent training adherence</p>
+    </div>
   </div>
 </div>
 
@@ -959,19 +1102,22 @@ try { selectedGoal = JSON.parse(localStorage.getItem('aptoflux-goal') || 'null')
 // VIEW TOGGLE
 // ════════════════════════════════════════════════════════════════
 function setView(v) {
-  ['goal', 'intake', 'gap', 'training', 'race'].forEach(name => {
+  ['goal', 'intake', 'gap', 'training', 'race', 'plan', 'week'].forEach(name => {
     const el = document.getElementById('view-' + name);
     if (el) el.classList.toggle('hidden', name !== v);
   });
   const activeClass = 'px-3 py-1 rounded-md text-xs font-semibold transition-all bg-brand-primary text-white';
   const idleClass   = 'px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary';
   const isPlan = ['goal', 'intake', 'gap'].includes(v);
-  document.getElementById('btn-plan').className     = isPlan        ? activeClass : idleClass;
-  document.getElementById('btn-training').className = v === 'training' ? activeClass : idleClass;
-  document.getElementById('btn-race').className     = v === 'race'     ? activeClass : idleClass;
+  document.getElementById('btn-plan').className     = isPlan             ? activeClass : idleClass;
+  document.getElementById('btn-week').className     = ['plan','week'].includes(v) ? activeClass : idleClass;
+  document.getElementById('btn-race').className     = v === 'race'       ? activeClass : idleClass;
+  document.getElementById('btn-training').className = v === 'training'   ? activeClass : idleClass;
   if (v === 'training') loadDashboard();
   if (v === 'gap')      renderGapAnalysis();
   if (v === 'intake')   renderIntakeGoalSummary();
+  if (v === 'plan')     renderPlanBuilder();
+  if (v === 'week')     renderWeeklyPlan();
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -979,13 +1125,14 @@ function setView(v) {
 // ════════════════════════════════════════════════════════════════
 function setSport(s) {
   sport = s;
-  const active = 'px-3 py-1 rounded-md text-xs font-semibold transition-all bg-brand-accent text-white';
-  const idle   = 'px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary';
-  document.getElementById('btn-cycling').className = s === 'cycling' ? active : idle;
-  document.getElementById('btn-running').className = s === 'running'  ? active : idle;
   document.getElementById('kit-label').textContent = s === 'cycling' ? 'Bike + Kit Weight (kg)' : 'Running Kit Weight (kg)';
   document.getElementById('kit-weight').value = s === 'cycling' ? '8' : '0.5';
   document.getElementById('target-speed').value = s === 'cycling' ? '30' : '9';
+  // Update intake gear label too
+  const fiGearLabel = document.getElementById('fi-gear-label');
+  if (fiGearLabel) fiGearLabel.textContent = s === 'cycling' ? 'Bike + Kit weight (kg)' : 'Running kit weight (kg)';
+  const ftpWrap = document.getElementById('fi-ftp-wrap');
+  if (ftpWrap) ftpWrap.classList.toggle('hidden', s === 'running');
   updateVo2PaceHint();
   if (rawIntervals) recalculate();
 }
@@ -1340,6 +1487,7 @@ function updateSummary(p) {
   } else { zoneRow.classList.add('hidden'); zoneRow.classList.remove('grid'); }
 
   document.getElementById('summary-section').classList.remove('hidden');
+  document.getElementById('plan-cta')?.classList.remove('hidden');
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1970,6 +2118,10 @@ function populateIntakeForm(data) {
   set('fi-age', data.age);
   set('fi-fatigue', data.fatigue_level);
   updateFatigueLabel(data.fatigue_level);
+  set('fi-body-weight', data.body_weight_kg);
+  set('fi-gear-weight', data.gear_weight_kg);
+  set('fi-vo2max', data.vo2max);
+  set('fi-ftp', data.ftp_w);
   if (data.sport) setIntakeSport(data.sport);
 }
 
@@ -2004,6 +2156,10 @@ async function submitIntake() {
     longest_session_h,
     fatigue_level,
     age,
+    body_weight_kg: parseFloat(document.getElementById('fi-body-weight').value) || null,
+    gear_weight_kg: parseFloat(document.getElementById('fi-gear-weight').value) || null,
+    vo2max: parseFloat(document.getElementById('fi-vo2max').value) || null,
+    ftp_w: parseFloat(document.getElementById('fi-ftp').value) || null,
   };
 
   try {
@@ -2182,7 +2338,41 @@ async function openPresetRoute(presetId) {
   const srcLabel = document.getElementById('event-source-label');
   if (srcLabel) { srcLabel.textContent = 'Route: ' + ev.name; srcLabel.classList.remove('hidden'); }
   document.getElementById('process-btn').disabled = false;
-  recalculate();
+  applyIntakeToRaceAnalyzer();
+}
+
+function applyIntakeToRaceAnalyzer() {
+  if (!fitnessIntake) return;
+  if (fitnessIntake.body_weight_kg) document.getElementById('body-weight').value = fitnessIntake.body_weight_kg;
+  if (fitnessIntake.gear_weight_kg) document.getElementById('kit-weight').value  = fitnessIntake.gear_weight_kg;
+  if (fitnessIntake.vo2max)  { document.getElementById('vo2max').value  = fitnessIntake.vo2max;  updateVo2PaceHint(); }
+  if (fitnessIntake.ftp_w)   { document.getElementById('ftp').value     = fitnessIntake.ftp_w; }
+  // Apply target time from goal
+  if (selectedGoal?.target_finish_min) {
+    const tMin = selectedGoal.target_finish_min;
+    const h = Math.floor(tMin / 60), m = tMin % 60;
+    document.querySelector('input[name="target-type"][value="time"]').checked = true;
+    document.getElementById('target-time').value = h + ':' + String(m).padStart(2, '0');
+    document.getElementById('speed-wrap').classList.add('hidden');
+    document.getElementById('time-wrap').classList.remove('hidden');
+    updateTargetIndication();
+  }
+  if (rawIntervals) recalculate();
+}
+
+async function openRaceAnalyzerFromGap() {
+  if (!selectedGoal) { setView('race'); return; }
+  if (selectedGoal.event_id === 'custom') {
+    setView('race');
+    applyIntakeToRaceAnalyzer();
+    return;
+  }
+  await openPresetRoute(selectedGoal.event_id);
+  applyIntakeToRaceAnalyzer();
+}
+
+function openPlanBuilder() {
+  setView('plan');
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -2263,6 +2453,275 @@ async function initApp() {
   }
 }
 initApp();
+
+// ════════════════════════════════════════════════════════════════
+// PLAN BUILDER
+// ════════════════════════════════════════════════════════════════
+const PLAN_SPORTS = [
+  { id:'cycling',  icon:'🚴', label:'Cycling',     vo2_gain:0.40, base_tss:65 },
+  { id:'running',  icon:'🏃', label:'Running',     vo2_gain:0.50, base_tss:75 },
+  { id:'strength', icon:'🏋️', label:'Strength',    vo2_gain:0.10, base_tss:50 },
+  { id:'swimming', icon:'🏊', label:'Swimming',    vo2_gain:0.30, base_tss:55 },
+  { id:'yoga',     icon:'🧘', label:'Mobility',    vo2_gain:0.00, base_tss:20 },
+];
+let selectedSports = {};
+
+function renderPlanBuilder() {
+  const isCustom = selectedGoal?.event_id === 'custom';
+  const ev = selectedGoal ? (isCustom ? customEventData : PRESET_EVENTS[selectedGoal.event_id]) : null;
+  if (ev) {
+    document.getElementById('plan-event-icon').textContent = isCustom ? '✏️' : (ev.icon ?? '🏅');
+    document.getElementById('plan-event-name').textContent = ev.name ?? 'Custom Event';
+    const tMin = selectedGoal.target_finish_min ?? (ev.duration_range?.max ?? 360);
+    const weeks = selectedGoal.event_date
+      ? Math.max(0, Math.round((new Date(selectedGoal.event_date).getTime() - Date.now()) / (7 * 86400000)))
+      : 16;
+    document.getElementById('plan-event-meta').textContent =
+      'Target: ' + Math.floor(tMin/60) + 'h' + String(tMin%60).padStart(2,'0') + ' · ' + weeks + ' weeks away';
+  }
+
+  if (ev && !Object.keys(selectedSports).length) {
+    const primSport = ev.sport ?? 'cycling';
+    selectedSports[primSport] = 3;
+  }
+
+  const container = document.getElementById('plan-sports-list');
+  container.innerHTML = PLAN_SPORTS.map(sp => {
+    const sessions = selectedSports[sp.id] ?? 0;
+    const selected = sessions > 0;
+    return `<div class="bg-white border-2 ${selected ? 'border-brand-accent' : 'border-brand-border'} rounded-xl p-4 transition-colors">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-xl">${sp.icon}</span>
+          <span class="text-sm font-semibold text-brand-primary">${sp.label}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          ${selected ? `
+            <div class="flex items-center gap-1">
+              <button onclick="setPlanSportFreq('${sp.id}', Math.max(0, (selectedSports['${sp.id}']||0)-1))"
+                class="w-7 h-7 rounded-lg bg-brand-surface text-brand-primary font-bold text-sm hover:bg-brand-border transition-colors flex items-center justify-center">−</button>
+              <span class="w-8 text-center text-sm font-bold text-brand-accent">${sessions}×</span>
+              <button onclick="setPlanSportFreq('${sp.id}', Math.min(6, (selectedSports['${sp.id}']||0)+1))"
+                class="w-7 h-7 rounded-lg bg-brand-surface text-brand-primary font-bold text-sm hover:bg-brand-border transition-colors flex items-center justify-center">+</button>
+            </div>
+            <span class="text-xs text-brand-muted">per week</span>
+          ` : `
+            <button onclick="setPlanSportFreq('${sp.id}', 2)"
+              class="px-3 py-1.5 rounded-lg bg-brand-surface text-xs font-semibold text-brand-muted hover:text-brand-primary hover:bg-brand-border transition-colors">
+              + Add
+            </button>
+          `}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setPlanSportFreq(sportId, freq) {
+  if (freq === 0) {
+    delete selectedSports[sportId];
+  } else {
+    const count = Object.keys(selectedSports).filter(k => selectedSports[k] > 0).length;
+    if (!selectedSports[sportId] && count >= 3) {
+      document.getElementById('plan-sport-limit').classList.remove('hidden');
+      setTimeout(() => document.getElementById('plan-sport-limit').classList.add('hidden'), 3000);
+      return;
+    }
+    selectedSports[sportId] = freq;
+  }
+  renderPlanBuilder();
+}
+
+function generateWeeklyPlan() {
+  if (!Object.keys(selectedSports).length) {
+    alert('Please select at least one sport.');
+    return;
+  }
+  setView('week');
+}
+
+// ════════════════════════════════════════════════════════════════
+// WEEKLY PLAN RENDERER
+// ════════════════════════════════════════════════════════════════
+const DAY_NAMES = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+const SESSION_TEMPLATES = {
+  long:      { type:'Long Endurance', zone:'Z2',   tss_mult:1.3, dur_h:2.5, intensity_mult:0.9, color:'#3B82F6' },
+  threshold: { type:'Threshold',      zone:'Z3',   tss_mult:1.0, dur_h:1.0, intensity_mult:1.0, color:'#F59E0B' },
+  intervals: { type:'VO2max Intervals', zone:'Z4-5', tss_mult:1.3, dur_h:0.75, intensity_mult:1.2, color:'#EF4444' },
+  recovery:  { type:'Recovery',       zone:'Z1',   tss_mult:0.4, dur_h:0.75, intensity_mult:0.3, color:'#22C55E' },
+  strength:  { type:'Strength',       zone:'—',    tss_mult:0.7, dur_h:0.75, intensity_mult:0.5, color:'#8B5CF6' },
+  mobility:  { type:'Mobility',       zone:'—',    tss_mult:0.2, dur_h:0.5,  intensity_mult:0.1, color:'#6B7280' },
+};
+
+const DAY_PREF = { long:[5,6], intervals:[1,3], threshold:[2,4], recovery:[0,4], strength:[1,2,3,4], mobility:[0,4,6] };
+
+function buildSessionList() {
+  const sessions = [];
+  for (const [sportId, freq] of Object.entries(selectedSports)) {
+    const sp = PLAN_SPORTS.find(s => s.id === sportId);
+    if (!sp) continue;
+    const baseType = (sportId === 'strength') ? 'strength' : (sportId === 'yoga') ? 'mobility' : null;
+    if (baseType) {
+      for (let i = 0; i < freq; i++) sessions.push({ sport: sp, sessionType: SESSION_TEMPLATES[baseType] });
+    } else {
+      const types = freq >= 3 ? ['long','intervals','threshold','recovery','recovery','recovery'] :
+                    freq === 2 ? ['long','intervals'] : ['long'];
+      for (let i = 0; i < freq; i++) {
+        sessions.push({ sport: sp, sessionType: SESSION_TEMPLATES[types[Math.min(i, types.length-1)]] });
+      }
+    }
+  }
+  return sessions;
+}
+
+function assignDays(sessions) {
+  const week = Array(7).fill(null);
+  const used = new Set();
+  const getTypeKey = (s) => {
+    if (s.sport.id === 'strength') return 'strength';
+    if (s.sport.id === 'yoga') return 'mobility';
+    const t = s.sessionType.type.toLowerCase();
+    if (t.includes('long')) return 'long';
+    if (t.includes('interval')) return 'intervals';
+    if (t.includes('threshold')) return 'threshold';
+    return 'recovery';
+  };
+  const order = ['long','intervals','threshold','strength','mobility','recovery'];
+  sessions.sort((a,b) => order.indexOf(getTypeKey(a)) - order.indexOf(getTypeKey(b)));
+
+  for (const session of sessions) {
+    const key = getTypeKey(session);
+    const prefs = DAY_PREF[key] ?? [0,1,2,3,4,5,6];
+    let assigned = false;
+    for (const day of prefs) {
+      if (!used.has(day)) {
+        week[day] = session;
+        used.add(day);
+        assigned = true;
+        break;
+      }
+    }
+    if (!assigned) {
+      for (let d = 0; d < 7; d++) {
+        if (!used.has(d)) {
+          week[d] = session;
+          used.add(d);
+          break;
+        }
+      }
+    }
+  }
+  return week;
+}
+
+function renderWeeklyPlan() {
+  const isCustom = selectedGoal?.event_id === 'custom';
+  const ev = selectedGoal ? (isCustom ? customEventData : PRESET_EVENTS[selectedGoal.event_id]) : null;
+  const weeks = selectedGoal?.event_date
+    ? Math.max(0, Math.round((new Date(selectedGoal.event_date).getTime() - Date.now()) / (7*86400000)))
+    : 16;
+
+  document.getElementById('week-event-meta').textContent =
+    (ev?.name ?? 'Event') + ' · ' + weeks + ' weeks to go';
+
+  const sessions = buildSessionList();
+  const week = assignDays(sessions);
+
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = DAY_NAMES.map((day, i) => {
+    const s = week[i];
+    if (!s) return `<div class="bg-brand-surface rounded-xl p-2 text-center">
+        <p class="text-xs font-semibold text-brand-muted mb-2">${day}</p>
+        <span class="text-2xl opacity-20">🛌</span>
+        <p class="text-xs text-brand-muted mt-1">Rest</p>
+      </div>`;
+    return `<div class="bg-white border border-brand-border rounded-xl p-2 shadow-sm">
+      <p class="text-xs font-semibold text-brand-muted mb-2">${day}</p>
+      <div class="text-center mb-1"><span class="text-xl">${s.sport.icon}</span></div>
+      <p class="text-xs font-bold text-brand-primary text-center leading-tight">${s.sessionType.type}</p>
+      <p class="text-xs text-center mt-1" style="color:${s.sessionType.color}">${s.sessionType.zone}</p>
+      <p class="text-xs text-brand-muted text-center mt-0.5">${s.sessionType.dur_h >= 1 ? s.sessionType.dur_h + 'h' : Math.round(s.sessionType.dur_h*60) + 'min'}</p>
+    </div>`;
+  }).join('');
+
+  const totalTSS = sessions.reduce((s, sess) => s + Math.round(sess.sport.base_tss * sess.sessionType.tss_mult), 0);
+  const totalHrs = sessions.reduce((s, sess) => s + sess.sessionType.dur_h, 0);
+  document.getElementById('week-tss').textContent = totalTSS;
+  document.getElementById('week-hours').textContent = totalHrs.toFixed(1) + 'h';
+  document.getElementById('week-sessions').textContent = sessions.length;
+
+  const intake = fitnessIntake;
+  const currentVO2 = intake?.vo2max ?? intake?.recent_vo2max_estimate ?? 45;
+  const evSport = ev?.sport ?? 'cycling';
+  const reqVO2 = selectedGoal ? computeGapAnalysis(intake ?? { effort_distance_km:80, effort_time_min:180, weekly_hours:8, longest_session_h:3.5, fatigue_level:3, age:35, sport:'cycling' }, selectedGoal).metrics[0].required : 60;
+
+  let weeklyVO2Gain = 0;
+  for (const sess of sessions) {
+    weeklyVO2Gain += sess.sport.vo2_gain * sess.sessionType.intensity_mult;
+  }
+  weeklyVO2Gain = Math.min(weeklyVO2Gain, 1.0);
+
+  const projVO2 = Math.min(reqVO2 + 5, Math.round((currentVO2 + weeklyVO2Gain * weeks) * 10) / 10);
+  const vo2Pct = Math.min(100, Math.round(projVO2 / reqVO2 * 100));
+
+  const avgDailyTSS = totalTSS / 7;
+  const ctlNow = 40;
+  const projCTL = Math.round(ctlNow + (avgDailyTSS - ctlNow) * (1 - Math.exp(-weeks / 6)));
+
+  const currentReadiness = (intake && selectedGoal) ? computeGapAnalysis(intake, selectedGoal).readiness_pct : 50;
+  const projReadiness = Math.min(95, Math.round(currentReadiness + (100 - currentReadiness) * (weeklyVO2Gain * weeks / (reqVO2 - currentVO2 + 1)) * 0.6));
+
+  const projections = [
+    {
+      label: 'Estimated VO₂max',
+      current: currentVO2,
+      projected: projVO2,
+      required: reqVO2,
+      unit: 'ml/kg/min',
+      color: projVO2 >= reqVO2 ? '#22c55e' : projVO2 >= reqVO2 * 0.85 ? '#f59e0b' : '#ef4444',
+    },
+    {
+      label: 'Fitness (CTL)',
+      current: ctlNow,
+      projected: projCTL,
+      required: Math.round(avgDailyTSS * 1.2),
+      unit: 'TSS/day avg',
+      color: projCTL >= avgDailyTSS ? '#22c55e' : '#f59e0b',
+    },
+    {
+      label: 'Race Readiness',
+      current: currentReadiness,
+      projected: projReadiness,
+      required: 80,
+      unit: '%',
+      color: projReadiness >= 80 ? '#22c55e' : projReadiness >= 60 ? '#f59e0b' : '#ef4444',
+    },
+  ];
+
+  document.getElementById('week-projections').innerHTML = projections.map(p => `
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-semibold text-brand-primary">${p.label}</span>
+        <div class="flex items-center gap-3 text-xs">
+          <span class="text-brand-muted">Now: <strong class="text-brand-primary">${p.current} ${p.unit}</strong></span>
+          <span class="text-brand-muted">→</span>
+          <span style="color:${p.color}">At event: <strong>${p.projected} ${p.unit}</strong></span>
+          <span class="text-brand-muted">(need ${p.required})</span>
+        </div>
+      </div>
+      <div class="relative w-full bg-brand-surface rounded-full h-3 overflow-hidden">
+        <div class="h-3 rounded-full" style="width:${Math.min(100,Math.round(p.current/p.required*100))}%;background:#D1D5E8"></div>
+        <div class="h-3 rounded-full absolute top-0 left-0 transition-all duration-700" style="width:${Math.min(100,Math.round(p.projected/p.required*100))}%;background:${p.color};opacity:0.7"></div>
+      </div>
+      <div class="flex justify-between text-xs text-brand-muted mt-1">
+        <span>Current</span>
+        <span style="color:${p.color}">+${Math.round((p.projected-p.current)*10)/10} ${p.unit} projected</span>
+        <span>Required: ${p.required} ${p.unit}</span>
+      </div>
+    </div>
+  `).join('');
+}
 </script>
 </body>
 </html>
