@@ -2342,12 +2342,14 @@ async function openPresetRoute(presetId) {
 }
 
 function applyIntakeToRaceAnalyzer() {
-  if (!fitnessIntake) return;
-  if (fitnessIntake.body_weight_kg) document.getElementById('body-weight').value = fitnessIntake.body_weight_kg;
-  if (fitnessIntake.gear_weight_kg) document.getElementById('kit-weight').value  = fitnessIntake.gear_weight_kg;
-  if (fitnessIntake.vo2max)  { document.getElementById('vo2max').value  = fitnessIntake.vo2max;  updateVo2PaceHint(); }
-  if (fitnessIntake.ftp_w)   { document.getElementById('ftp').value     = fitnessIntake.ftp_w; }
-  // Apply target time from goal
+  // Apply athlete dimensions from intake (if available)
+  if (fitnessIntake) {
+    if (fitnessIntake.body_weight_kg) document.getElementById('body-weight').value = fitnessIntake.body_weight_kg;
+    if (fitnessIntake.gear_weight_kg) document.getElementById('kit-weight').value  = fitnessIntake.gear_weight_kg;
+    if (fitnessIntake.vo2max)  { document.getElementById('vo2max').value  = fitnessIntake.vo2max;  updateVo2PaceHint(); }
+    if (fitnessIntake.ftp_w)   { document.getElementById('ftp').value     = fitnessIntake.ftp_w; }
+  }
+  // Apply target time from goal — independent of fitnessIntake
   if (selectedGoal?.target_finish_min) {
     const tMin = selectedGoal.target_finish_min;
     const h = Math.floor(tMin / 60), m = tMin % 60;
