@@ -8,6 +8,7 @@ import {
   estimateTSS,
   eventAdvisory,
 } from './lib/training-brain';
+import { FitnessIntake, GoalSelection } from './lib/gap-analysis';
 import appHtml from './index.html';
 
 export interface Env {
@@ -165,6 +166,40 @@ app.get('/api/events/:id/gpx', async (c) => {
   const raw = await c.env.ATHLETE_KV.get(`event-gpx:${id}`);
   if (!raw) return c.json({ error: 'No GPX data for this event' }, 404);
   return c.json({ intervals: JSON.parse(raw) });
+});
+
+// ─── API: fitness intake from manual form or Apple Shortcut ───────────────────
+
+app.post('/api/fitness-intake', async (c) => {
+  const token = c.env.SYNC_TOKEN;
+  if (token) {
+    const provided = c.req.header('X-Sync-Token') ?? c.req.query('token');
+    if (provided !== token) return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  let body: FitnessIntake;
+  try {
+    body = await c.req.json<FitnessIntake>();
+  } catch {
+    return c.json({ error: 'Invalid JSON' }, 400);
+  }
+
+  if (!body.date || !/^\d{4}-\d{2}-\d{2}$/.test(body.date)) {
+    return c.json({ error: 'Missing or invalid date (expected YYYY-MM-DD)' }, 400);
+  }
+  if (!body.sport || !body.effort_distance_km || !body.effort_time_min ||
+      !body.weekly_hours || !body.longest_session_h || !body.fatigue_level || !body.age) {
+    return c.json({ error: 'Missing required fields' }, 400);
+  }
+
+  await c.env.ATHLETE_KV.put('fitness-intake:latest', JSON.stringify(body));
+  return c.json({ ok: true, source: body.source });
+});
+
+app.get('/api/fitness-intake', async (c) => {
+  const raw = await c.env.ATHLETE_KV.get('fitness-intake:latest');
+  if (!raw) return c.json({ error: 'No fitness intake data' }, 404);
+  return c.json(JSON.parse(raw) as FitnessIntake);
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

@@ -70,14 +70,18 @@
           🏃 Running
         </button>
       </div>
-      <!-- View selector — Training Hub first -->
+      <!-- View selector -->
       <div class="flex bg-brand-surface rounded-lg p-1 gap-1">
+        <button id="btn-plan" onclick="setView('goal')"
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-brand-primary text-white">
+          🎯 My Plan
+        </button>
         <button id="btn-training" onclick="setView('training')"
           class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary">
           🧬 Training Hub
         </button>
         <button id="btn-race" onclick="setView('race')"
-          class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-brand-primary text-white">
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary">
           📈 Race Analyzer
         </button>
       </div>
@@ -268,7 +272,7 @@
 </div><!-- end view-training -->
 
 <!-- ═══════ RACE ANALYZER ═══════ -->
-<div id="view-race">
+<div id="view-race" class="hidden">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
     <!-- ══ LEFT PANEL ══ -->
@@ -621,6 +625,258 @@
     </div><!-- end right panel -->
   </div>
 </div><!-- end view-race -->
+
+<!-- ═══════ GOAL SELECTION ═══════ -->
+<div id="view-goal" class="hidden">
+  <div class="max-w-2xl mx-auto">
+    <div class="flex items-center gap-2 mb-6">
+      <div class="flex items-center gap-1.5">
+        <span class="w-6 h-6 rounded-full bg-brand-accent text-white text-xs font-bold flex items-center justify-center">1</span>
+        <span class="text-xs font-semibold text-brand-primary">Goal</span>
+      </div>
+      <div class="h-px flex-1 bg-brand-border"></div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-6 h-6 rounded-full bg-brand-surface text-brand-muted text-xs font-bold flex items-center justify-center">2</span>
+        <span class="text-xs text-brand-muted">Fitness</span>
+      </div>
+      <div class="h-px flex-1 bg-brand-border"></div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-6 h-6 rounded-full bg-brand-surface text-brand-muted text-xs font-bold flex items-center justify-center">3</span>
+        <span class="text-xs text-brand-muted">Gap Analysis</span>
+      </div>
+    </div>
+    <h2 class="text-lg font-bold text-brand-primary font-display mb-1">Choose your goal event</h2>
+    <p class="text-xs text-brand-muted mb-5">Select the event you're training towards. Your fitness gap analysis will be tailored to this goal.</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+      <div id="card-livigno" onclick="selectGoal('livigno')"
+        class="bg-white border-2 border-brand-border rounded-xl p-4 cursor-pointer hover:border-brand-accent transition-colors">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <span class="text-2xl">🚴</span>
+            <h3 class="text-sm font-bold text-brand-primary font-display mt-1">Livigno Cycling Granfondo</h3>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Elite</span>
+        </div>
+        <div class="flex flex-wrap gap-3 text-xs text-brand-muted mb-3">
+          <span>📏 130 km</span><span>⛰️ 3,200 m gain</span><span>⏱ 5h30 – 8h00</span>
+        </div>
+        <div class="space-y-2 border-t border-brand-border pt-3" onclick="event.stopPropagation()">
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Target finish time (e.g. 6:30)</label>
+            <input id="target-livigno" type="text" placeholder="hh:mm" maxlength="5"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Event date (optional)</label>
+            <input id="date-livigno" type="date"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+        </div>
+      </div>
+      <div id="card-nyc-marathon" onclick="selectGoal('nyc-marathon')"
+        class="bg-white border-2 border-brand-border rounded-xl p-4 cursor-pointer hover:border-brand-accent transition-colors">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <span class="text-2xl">🏃</span>
+            <h3 class="text-sm font-bold text-brand-primary font-display mt-1">New York City Marathon</h3>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">Hard</span>
+        </div>
+        <div class="flex flex-wrap gap-3 text-xs text-brand-muted mb-3">
+          <span>📏 42.2 km</span><span>⛰️ ~300 m gain</span><span>⏱ 3h30 – 6h00</span>
+        </div>
+        <div class="space-y-2 border-t border-brand-border pt-3" onclick="event.stopPropagation()">
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Target finish time (e.g. 4:30)</label>
+            <input id="target-nyc-marathon" type="text" placeholder="hh:mm" maxlength="5"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Event date (optional)</label>
+            <input id="date-nyc-marathon" type="date"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+        </div>
+      </div>
+    </div>
+    <button id="goal-continue-btn" disabled onclick="goToIntake()"
+      class="w-full bg-brand-accent hover:bg-brand-hover disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold py-3 rounded-xl transition-colors">
+      Continue to fitness assessment →
+    </button>
+  </div>
+</div>
+
+<!-- ═══════ FITNESS INTAKE ═══════ -->
+<div id="view-intake" class="hidden">
+  <div class="max-w-2xl mx-auto">
+    <div class="flex items-center gap-2 mb-6">
+      <div class="flex items-center gap-1.5">
+        <span class="w-6 h-6 rounded-full bg-brand-surface text-brand-muted text-xs font-bold flex items-center justify-center cursor-pointer" onclick="setView('goal')">1</span>
+        <span class="text-xs text-brand-muted cursor-pointer" onclick="setView('goal')">Goal</span>
+      </div>
+      <div class="h-px flex-1 bg-brand-accent"></div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-6 h-6 rounded-full bg-brand-accent text-white text-xs font-bold flex items-center justify-center">2</span>
+        <span class="text-xs font-semibold text-brand-primary">Fitness</span>
+      </div>
+      <div class="h-px flex-1 bg-brand-border"></div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-6 h-6 rounded-full bg-brand-surface text-brand-muted text-xs font-bold flex items-center justify-center">3</span>
+        <span class="text-xs text-brand-muted">Gap Analysis</span>
+      </div>
+    </div>
+    <div id="shortcut-connected" class="hidden mb-4 flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+      <span class="text-green-600">✓</span>
+      <div>
+        <p class="text-xs font-semibold text-green-700">Apple Shortcut connected</p>
+        <p class="text-xs text-green-600">Fitness data imported automatically</p>
+      </div>
+    </div>
+    <div class="mb-4 flex items-center gap-3 bg-brand-surface rounded-xl px-4 py-3">
+      <span id="intake-goal-icon" class="text-lg">🚴</span>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold text-brand-primary truncate" id="intake-goal-name">Livigno Cycling Granfondo</p>
+        <p class="text-xs text-brand-muted" id="intake-goal-details">Target: 8h00 · 16 weeks to go</p>
+      </div>
+      <button onclick="setView('goal')" class="text-xs text-brand-accent hover:text-brand-hover shrink-0">Change</button>
+    </div>
+    <h2 class="text-lg font-bold text-brand-primary font-display mb-1">Your current fitness</h2>
+    <p class="text-xs text-brand-muted mb-5">Tell us about a recent effort so we can estimate your current fitness level.</p>
+    <div class="space-y-4">
+      <div class="bg-white border border-brand-border rounded-xl p-4">
+        <label class="text-xs font-semibold text-brand-muted uppercase tracking-widest block mb-3">Sport focus</label>
+        <div class="flex gap-2">
+          <button id="fi-btn-cycling" onclick="setIntakeSport('cycling')"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-brand-accent text-white">🚴 Cycling</button>
+          <button id="fi-btn-running" onclick="setIntakeSport('running')"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-brand-surface text-brand-muted hover:text-brand-primary">🏃 Running</button>
+          <button id="fi-btn-both" onclick="setIntakeSport('both')"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-brand-surface text-brand-muted hover:text-brand-primary">⚡ Both</button>
+        </div>
+      </div>
+      <div class="bg-white border border-brand-border rounded-xl p-4">
+        <label class="text-xs font-semibold text-brand-muted uppercase tracking-widest block mb-3">Recent best effort</label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Distance (km)</label>
+            <input id="fi-effort-distance" type="number" min="1" max="300" placeholder="e.g. 80" step="0.1"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Finish time (hh:mm)</label>
+            <input id="fi-effort-time" type="text" placeholder="e.g. 3:45" maxlength="5"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+        </div>
+      </div>
+      <div class="bg-white border border-brand-border rounded-xl p-4">
+        <label class="text-xs font-semibold text-brand-muted uppercase tracking-widest block mb-3">Training volume</label>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Weekly hours</label>
+            <input id="fi-weekly-hours" type="number" min="1" max="40" placeholder="e.g. 8" step="0.5"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Longest session (hrs)</label>
+            <input id="fi-longest-session" type="number" min="0.5" max="24" placeholder="e.g. 3.5" step="0.5"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Age (years)</label>
+            <input id="fi-age" type="number" min="16" max="80" placeholder="e.g. 35"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+        </div>
+      </div>
+      <div class="bg-white border border-brand-border rounded-xl p-4">
+        <label class="text-xs font-semibold text-brand-muted uppercase tracking-widest block mb-3">Current fatigue: <span id="fi-fatigue-label" class="text-brand-accent normal-case">3 — Moderate</span></label>
+        <input id="fi-fatigue" type="range" min="1" max="5" value="3" oninput="updateFatigueLabel(this.value)" class="w-full">
+        <div class="flex justify-between text-xs text-brand-muted mt-1"><span>1 — Fresh</span><span>5 — Exhausted</span></div>
+      </div>
+    </div>
+    <details class="mt-4 bg-white border border-brand-border rounded-xl overflow-hidden">
+      <summary class="px-4 py-3 text-xs font-semibold text-brand-muted uppercase tracking-widest cursor-pointer hover:text-brand-primary select-none">
+        📱 Apple Shortcut Integration
+      </summary>
+      <div class="px-4 pb-4 border-t border-brand-border">
+        <p class="text-xs text-brand-muted mt-3 mb-2">POST to <code class="bg-brand-surface px-1.5 py-0.5 rounded text-brand-accent font-mono">/api/fitness-intake</code> from your Shortcut:</p>
+        <pre class="bg-brand-surface rounded-lg p-3 text-xs text-brand-primary overflow-x-auto font-mono leading-relaxed whitespace-pre">{
+  "date": "2026-03-27",
+  "source": "apple-shortcut",
+  "sport": "cycling",
+  "effort_distance_km": 80,
+  "effort_time_min": 180,
+  "weekly_hours": 8,
+  "longest_session_h": 3.5,
+  "fatigue_level": 2,
+  "age": 38,
+  "resting_heart_rate": 52,
+  "recent_vo2max_estimate": 48,
+  "avg_hrv_7day": 58,
+  "weekly_active_calories": 3200
+}</pre>
+        <p class="text-xs text-brand-muted mt-2">Optional auth: <code class="bg-brand-surface px-1 rounded font-mono">X-Sync-Token: &lt;token&gt;</code></p>
+      </div>
+    </details>
+    <div class="flex gap-3 mt-5">
+      <button onclick="setView('goal')"
+        class="px-5 py-3 rounded-xl border border-brand-border text-xs font-semibold text-brand-muted hover:text-brand-primary transition-colors">
+        ← Back
+      </button>
+      <button onclick="submitIntake()"
+        class="flex-1 bg-brand-accent hover:bg-brand-hover text-white text-sm font-semibold py-3 rounded-xl transition-colors">
+        Analyze my fitness →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ GAP ANALYSIS ═══════ -->
+<div id="view-gap" class="hidden">
+  <div class="max-w-2xl mx-auto">
+    <div class="flex items-center gap-2 mb-6">
+      <div class="flex items-center gap-1.5">
+        <span class="w-6 h-6 rounded-full bg-brand-surface text-brand-muted text-xs font-bold flex items-center justify-center cursor-pointer" onclick="setView('goal')">1</span>
+        <span class="text-xs text-brand-muted cursor-pointer" onclick="setView('goal')">Goal</span>
+      </div>
+      <div class="h-px flex-1 bg-brand-accent"></div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-6 h-6 rounded-full bg-brand-surface text-brand-muted text-xs font-bold flex items-center justify-center cursor-pointer" onclick="setView('intake')">2</span>
+        <span class="text-xs text-brand-muted cursor-pointer" onclick="setView('intake')">Fitness</span>
+      </div>
+      <div class="h-px flex-1 bg-brand-accent"></div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-6 h-6 rounded-full bg-brand-accent text-white text-xs font-bold flex items-center justify-center">3</span>
+        <span class="text-xs font-semibold text-brand-primary">Gap Analysis</span>
+      </div>
+    </div>
+    <div class="mb-5 flex items-center gap-3 bg-white border border-brand-border rounded-xl p-4">
+      <span id="gap-event-icon" class="text-2xl">🚴</span>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-bold text-brand-primary font-display truncate" id="gap-event-name">Livigno Cycling Granfondo</p>
+        <p class="text-xs text-brand-muted" id="gap-event-meta">Target: 8h00 · 16 weeks away</p>
+      </div>
+      <button onclick="setView('goal')" class="text-xs text-brand-accent hover:text-brand-hover shrink-0">Change</button>
+    </div>
+    <div class="mb-5 bg-white border border-brand-border rounded-xl p-6 text-center">
+      <p class="text-xs font-semibold text-brand-muted uppercase tracking-widest mb-3">Readiness Score</p>
+      <div id="gap-score-value" class="text-6xl font-bold font-display mb-1 transition-all">—</div>
+      <div id="gap-score-label" class="text-sm font-medium text-brand-muted mb-4">Calculating…</div>
+      <div class="w-full bg-brand-surface rounded-full h-3 overflow-hidden">
+        <div id="gap-score-bar" class="h-3 rounded-full transition-all duration-700" style="width:0%"></div>
+      </div>
+      <p id="gap-weeks-label" class="text-xs text-brand-muted mt-3"></p>
+    </div>
+    <div id="gap-metrics-list" class="space-y-3 mb-5"></div>
+    <button onclick="buildPlan()"
+      class="w-full bg-brand-hover hover:opacity-90 text-white text-sm font-semibold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2">
+      🏋️ Build my training plan
+    </button>
+    <p class="text-center text-xs text-brand-muted mt-2">Adds your event to Training Hub with readiness tracking</p>
+  </div>
+</div>
+
 </main>
 
 <script>
@@ -636,19 +892,28 @@ let baseWMax = 0;
 let baseFTP  = 0;
 let thresholdLabel = '';
 let redDistFraction = 0;
+let selectedGoal = null;
+let intakeSport = 'cycling';
+let fitnessIntake = null;
+try { selectedGoal = JSON.parse(localStorage.getItem('aptoflux-goal') || 'null'); } catch {}
 
 // ════════════════════════════════════════════════════════════════
 // VIEW TOGGLE
 // ════════════════════════════════════════════════════════════════
 function setView(v) {
-  const isTraining = v === 'training';
-  document.getElementById('view-race').classList.toggle('hidden', isTraining);
-  document.getElementById('view-training').classList.toggle('hidden', !isTraining);
+  ['goal', 'intake', 'gap', 'training', 'race'].forEach(name => {
+    const el = document.getElementById('view-' + name);
+    if (el) el.classList.toggle('hidden', name !== v);
+  });
   const activeClass = 'px-3 py-1 rounded-md text-xs font-semibold transition-all bg-brand-primary text-white';
   const idleClass   = 'px-3 py-1 rounded-md text-xs font-semibold transition-all text-brand-muted hover:text-brand-primary';
-  document.getElementById('btn-race').className     = !isTraining ? activeClass : idleClass;
-  document.getElementById('btn-training').className =  isTraining ? activeClass : idleClass;
-  if (isTraining) loadDashboard();
+  const isPlan = ['goal', 'intake', 'gap'].includes(v);
+  document.getElementById('btn-plan').className     = isPlan        ? activeClass : idleClass;
+  document.getElementById('btn-training').className = v === 'training' ? activeClass : idleClass;
+  document.getElementById('btn-race').className     = v === 'race'     ? activeClass : idleClass;
+  if (v === 'training') loadDashboard();
+  if (v === 'gap')      renderGapAnalysis();
+  if (v === 'intake')   renderIntakeGoalSummary();
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1512,6 +1777,294 @@ function renderTSSChart(metrics, state) {
   ctx.fillStyle = '#FF5E3A'; ctx.fillText('CTL', pL + 4, pT + 12);
   ctx.fillStyle = '#00E5FF'; ctx.fillText('ATL', pL + 30, pT + 12);
 }
+
+// ════════════════════════════════════════════════════════════════
+// PRESET EVENTS
+// ════════════════════════════════════════════════════════════════
+const PRESET_EVENTS = {
+  livigno: { id:'livigno', name:'Livigno Cycling Granfondo', sport:'cycling', icon:'🚴', distance_km:130, elevation_m:3200, duration_range:{min:330,max:480}, difficulty:'Elite' },
+  'nyc-marathon': { id:'nyc-marathon', name:'New York City Marathon', sport:'running', icon:'🏃', distance_km:42.195, elevation_m:300, duration_range:{min:210,max:360}, difficulty:'Hard' },
+};
+
+// ════════════════════════════════════════════════════════════════
+// GOAL SELECTION
+// ════════════════════════════════════════════════════════════════
+function selectGoal(eventId) {
+  selectedGoal = { event_id: eventId };
+  Object.keys(PRESET_EVENTS).forEach(id => {
+    const card = document.getElementById('card-' + id);
+    if (!card) return;
+    card.classList.toggle('border-brand-accent', id === eventId);
+    card.classList.toggle('bg-orange-50', id === eventId);
+    card.classList.toggle('border-brand-border', id !== eventId);
+  });
+  document.getElementById('goal-continue-btn').disabled = false;
+  setSport(PRESET_EVENTS[eventId].sport);
+  localStorage.setItem('aptoflux-goal', JSON.stringify(selectedGoal));
+}
+
+function parseTargetTime(str) {
+  if (!str || !str.includes(':')) return null;
+  const [h, m] = str.split(':').map(Number);
+  if (isNaN(h) || isNaN(m)) return null;
+  return h * 60 + m;
+}
+
+function goToIntake() {
+  if (!selectedGoal) return;
+  const ev = PRESET_EVENTS[selectedGoal.event_id];
+  const targetVal = document.getElementById('target-' + selectedGoal.event_id)?.value;
+  const dateVal   = document.getElementById('date-'   + selectedGoal.event_id)?.value;
+  selectedGoal = {
+    ...selectedGoal,
+    target_finish_min: parseTargetTime(targetVal) ?? ev.duration_range.max,
+    event_date: dateVal || null,
+  };
+  localStorage.setItem('aptoflux-goal', JSON.stringify(selectedGoal));
+  setView('intake');
+}
+
+// ════════════════════════════════════════════════════════════════
+// FITNESS INTAKE
+// ════════════════════════════════════════════════════════════════
+function renderIntakeGoalSummary() {
+  if (!selectedGoal) return;
+  const ev = PRESET_EVENTS[selectedGoal.event_id];
+  if (!ev) return;
+  document.getElementById('intake-goal-icon').textContent = ev.icon;
+  document.getElementById('intake-goal-name').textContent = ev.name;
+  const tMin  = selectedGoal.target_finish_min ?? ev.duration_range.max;
+  const weeks = selectedGoal.event_date
+    ? Math.max(0, Math.round((new Date(selectedGoal.event_date).getTime() - Date.now()) / (7 * 86400000)))
+    : 16;
+  document.getElementById('intake-goal-details').textContent =
+    'Target: ' + Math.floor(tMin / 60) + 'h' + String(tMin % 60).padStart(2, '0') + ' · ' + weeks + ' weeks to go';
+  setIntakeSport(ev.sport);
+  if (fitnessIntake) populateIntakeForm(fitnessIntake);
+}
+
+function setIntakeSport(s) {
+  intakeSport = s;
+  const active = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-brand-accent text-white';
+  const idle   = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-brand-surface text-brand-muted hover:text-brand-primary';
+  ['cycling', 'running', 'both'].forEach(v => {
+    const btn = document.getElementById('fi-btn-' + v);
+    if (btn) btn.className = v === s ? active : idle;
+  });
+}
+
+const FATIGUE_LABELS = { 1:'Fresh', 2:'Light', 3:'Moderate', 4:'Tired', 5:'Exhausted' };
+function updateFatigueLabel(v) {
+  const el = document.getElementById('fi-fatigue-label');
+  if (el) el.textContent = v + ' — ' + (FATIGUE_LABELS[v] || '');
+}
+
+function populateIntakeForm(data) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+  set('fi-effort-distance', data.effort_distance_km);
+  if (data.effort_time_min) {
+    const h = Math.floor(data.effort_time_min / 60), m = data.effort_time_min % 60;
+    set('fi-effort-time', h + ':' + String(m).padStart(2, '0'));
+  }
+  set('fi-weekly-hours', data.weekly_hours);
+  set('fi-longest-session', data.longest_session_h);
+  set('fi-age', data.age);
+  set('fi-fatigue', data.fatigue_level);
+  updateFatigueLabel(data.fatigue_level);
+  if (data.sport) setIntakeSport(data.sport);
+}
+
+function parseEffortTime(str) {
+  if (!str) return null;
+  const parts = str.split(':').map(Number);
+  if (parts.length === 2) return parts[0] * 60 + (parts[1] || 0);
+  if (parts.length === 3) return parts[0] * 60 + (parts[1] || 0) + (parts[2] || 0) / 60;
+  return null;
+}
+
+async function submitIntake() {
+  const effort_distance_km = parseFloat(document.getElementById('fi-effort-distance').value);
+  const effort_time_min    = parseEffortTime(document.getElementById('fi-effort-time').value);
+  const weekly_hours       = parseFloat(document.getElementById('fi-weekly-hours').value);
+  const longest_session_h  = parseFloat(document.getElementById('fi-longest-session').value);
+  const age                = parseInt(document.getElementById('fi-age').value);
+  const fatigue_level      = parseInt(document.getElementById('fi-fatigue').value);
+
+  if (!effort_distance_km || !effort_time_min || !weekly_hours || !longest_session_h || !age) {
+    alert('Please fill in all required fields.');
+    return;
+  }
+
+  const payload = {
+    date: new Date().toISOString().slice(0, 10),
+    source: 'manual',
+    sport: intakeSport,
+    effort_distance_km,
+    effort_time_min,
+    weekly_hours,
+    longest_session_h,
+    fatigue_level,
+    age,
+  };
+
+  try {
+    const res = await fetch('/api/fitness-intake', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('Server error');
+    fitnessIntake = payload;
+    setView('gap');
+  } catch {
+    alert('Failed to save fitness data. Please try again.');
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// GAP ANALYSIS
+// ════════════════════════════════════════════════════════════════
+function estimateVO2maxRunning(dist_km, time_min) {
+  const v = (dist_km * 1000) / time_min;
+  const pct = 0.8 + 0.1894393 * Math.exp(-0.012778 * time_min)
+            + 0.2989558 * Math.exp(-0.1932605 * time_min);
+  return Math.max(20, Math.min(85, Math.round((-4.60 + 0.182258 * v + 0.000104 * v * v) / pct)));
+}
+
+function estimateVO2maxCycling(dist_km, time_min) {
+  return Math.max(20, Math.min(85, Math.round((dist_km / (time_min / 60)) * 1.8 + 3)));
+}
+
+function computeGapAnalysis(intake, goal) {
+  const ev      = PRESET_EVENTS[goal.event_id];
+  const tMin    = goal.target_finish_min ?? ev.duration_range.max;
+  const weeks   = goal.event_date
+    ? Math.max(0, Math.round((new Date(goal.event_date).getTime() - Date.now()) / (7 * 86400000)))
+    : 16;
+
+  const curVO2  = intake.recent_vo2max_estimate
+    ?? (ev.sport === 'running'
+        ? estimateVO2maxRunning(intake.effort_distance_km, intake.effort_time_min)
+        : estimateVO2maxCycling(intake.effort_distance_km, intake.effort_time_min));
+
+  const spd    = ev.distance_km / (tMin / 60);
+  const elev   = ev.sport === 'cycling' ? 1 + ev.elevation_m / 10000 : 1;
+  const reqVO2 = ev.sport === 'running'
+    ? estimateVO2maxRunning(ev.distance_km, tMin)
+    : Math.max(20, Math.min(85, Math.round(spd * elev * 1.8 + 3)));
+
+  const reqWeekly  = Math.round(tMin / 60 * 2.5 * 10) / 10;
+  const reqLongest = Math.round(tMin / 60 * 0.75 * 10) / 10;
+
+  const metrics = [
+    { label:'Estimated VO2max',  current:curVO2,                    required:reqVO2,    unit:'ml/kg/min', pct:Math.min(100,Math.round(curVO2/reqVO2*100)),                          weight:0.4 },
+    { label:'Weekly Volume',     current:intake.weekly_hours,       required:reqWeekly, unit:'hrs/week',  pct:Math.min(100,Math.round(intake.weekly_hours/reqWeekly*100)),           weight:0.3 },
+    { label:'Longest Session',   current:intake.longest_session_h,  required:reqLongest,unit:'hrs',       pct:Math.min(100,Math.round(intake.longest_session_h/reqLongest*100)),    weight:0.2 },
+    { label:'Recovery Status',   current:6-intake.fatigue_level,    required:5,         unit:'/ 5',       pct:Math.round(((6-intake.fatigue_level)/5)*100),                         weight:0.1 },
+  ];
+
+  const readiness = Math.round(metrics.reduce((s, m) => s + m.pct * m.weight, 0));
+  return {
+    readiness_pct: readiness,
+    weeks_to_event: weeks,
+    metrics,
+    color: readiness >= 80 ? 'green' : readiness >= 50 ? 'amber' : 'red',
+  };
+}
+
+async function renderGapAnalysis() {
+  if (!fitnessIntake) {
+    try {
+      const res = await fetch('/api/fitness-intake');
+      if (res.ok) {
+        fitnessIntake = await res.json();
+      } else {
+        setView('goal');
+        return;
+      }
+    } catch { setView('goal'); return; }
+  }
+  if (!selectedGoal) { setView('goal'); return; }
+
+  const ev  = PRESET_EVENTS[selectedGoal.event_id];
+  const gap = computeGapAnalysis(fitnessIntake, selectedGoal);
+  const tMin = selectedGoal.target_finish_min ?? ev.duration_range.max;
+
+  document.getElementById('gap-event-icon').textContent = ev.icon;
+  document.getElementById('gap-event-name').textContent = ev.name;
+  document.getElementById('gap-event-meta').textContent =
+    'Target: ' + Math.floor(tMin / 60) + 'h' + String(tMin % 60).padStart(2, '0') + ' · ' + gap.weeks_to_event + ' weeks away';
+
+  const COLORS = { green:'#22c55e', amber:'#f59e0b', red:'#ef4444' };
+  const LABELS = { green:'On Track', amber:'Needs Work', red:'Significant Gap' };
+  const col = COLORS[gap.color];
+
+  document.getElementById('gap-score-value').textContent = gap.readiness_pct + '%';
+  document.getElementById('gap-score-value').style.color = col;
+  document.getElementById('gap-score-label').textContent = LABELS[gap.color];
+  document.getElementById('gap-score-label').style.color = col;
+  document.getElementById('gap-score-bar').style.width      = gap.readiness_pct + '%';
+  document.getElementById('gap-score-bar').style.background = col;
+  document.getElementById('gap-weeks-label').textContent    = gap.weeks_to_event + ' weeks to build fitness';
+
+  document.getElementById('gap-metrics-list').innerHTML = gap.metrics.map(m => {
+    const c = m.pct >= 80 ? '#22c55e' : m.pct >= 50 ? '#f59e0b' : '#ef4444';
+    return '<div class="bg-white border border-brand-border rounded-xl p-4">' +
+      '<div class="flex items-center justify-between mb-2">' +
+        '<span class="text-xs font-semibold text-brand-primary">' + m.label + '</span>' +
+        '<span class="text-xs text-brand-muted font-mono">' + m.current + ' / ' + m.required + ' ' + m.unit + '</span>' +
+      '</div>' +
+      '<div class="w-full bg-brand-surface rounded-full h-2 overflow-hidden">' +
+        '<div class="h-2 rounded-full transition-all duration-500" style="width:' + m.pct + '%;background:' + c + '"></div>' +
+      '</div>' +
+      '<div class="flex justify-between mt-1.5">' +
+        '<span class="text-xs font-semibold" style="color:' + c + '">' + m.pct + '% of required</span>' +
+        '<span class="text-xs text-brand-muted">need ' + m.required + ' ' + m.unit + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function buildPlan() {
+  if (!selectedGoal) { setView('training'); return; }
+  const ev   = PRESET_EVENTS[selectedGoal.event_id];
+  const date = selectedGoal.event_date
+    || new Date(Date.now() + 16 * 7 * 86400000).toISOString().slice(0, 10);
+  try {
+    await fetch('/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: Date.now().toString(), name: ev.name, date, sport: ev.sport, distance_km: ev.distance_km }),
+    });
+  } catch {}
+  setView('training');
+}
+
+// ════════════════════════════════════════════════════════════════
+// PAGE INIT
+// ════════════════════════════════════════════════════════════════
+async function initApp() {
+  setSport('cycling');
+  try { selectedGoal = JSON.parse(localStorage.getItem('aptoflux-goal') || 'null'); } catch {}
+  try {
+    const res = await fetch('/api/fitness-intake');
+    if (res.ok) {
+      fitnessIntake = await res.json();
+      if (fitnessIntake.source === 'apple-shortcut') {
+        const badge = document.getElementById('shortcut-connected');
+        if (badge) badge.classList.remove('hidden');
+      }
+    }
+  } catch {}
+  if (fitnessIntake && selectedGoal) {
+    setView('gap');
+  } else if (fitnessIntake) {
+    setView('intake');
+  } else {
+    setView('goal');
+  }
+}
+initApp();
 </script>
 </body>
 </html>
