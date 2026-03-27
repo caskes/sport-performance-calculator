@@ -14,14 +14,14 @@
         extend: {
           colors: {
             brand: {
-              bg:        '#FAFAFA',
-              surface:   '#E8DFD0',
-              primary:   '#2D3436',
-              accent:    '#3D8B6E',
-              hover:     '#2E6B56',
-              highlight: '#E8C547',
-              muted:     '#7B8B8C',
-              border:    '#D8CCBE',
+              bg:        '#F4F5F9',
+              surface:   '#ECEEF5',
+              primary:   '#2B2F36',
+              accent:    '#FF5E3A',
+              hover:     '#6D3DED',
+              highlight: '#00E5FF',
+              muted:     '#6B7585',
+              border:    '#D1D5E8',
             }
           },
           fontFamily: {
@@ -36,15 +36,15 @@
   <style>
     body { font-family: 'DM Sans', system-ui, sans-serif; }
     h1,h2,h3,h4 { font-family: 'Space Grotesk', system-ui, sans-serif; }
-    input[type="range"]  { accent-color: #3D8B6E; cursor: pointer; }
-    input[type="radio"]  { accent-color: #3D8B6E; }
-    input[type="checkbox"] { accent-color: #3D8B6E; }
+    input[type="range"]  { accent-color: #FF5E3A; cursor: pointer; }
+    input[type="radio"]  { accent-color: #FF5E3A; }
+    input[type="checkbox"] { accent-color: #FF5E3A; }
     .fade-in { animation: fadeIn 0.35s ease both; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-    .drop-active { border-color: #3D8B6E !important; background-color: rgba(61,139,110,0.05); }
+    .drop-active { border-color: #FF5E3A !important; background-color: rgba(255,94,58,0.05); }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #E8DFD0; }
-    ::-webkit-scrollbar-thumb { background: #D8CCBE; border-radius: 3px; }
+    ::-webkit-scrollbar-track { background: #ECEEF5; }
+    ::-webkit-scrollbar-thumb { background: #D1D5E8; border-radius: 3px; }
     details summary { list-style: none; }
     details summary::-webkit-details-marker { display: none; }
   </style>
@@ -56,7 +56,7 @@
   <div class="max-w-7xl mx-auto px-5 py-3 flex items-center justify-between">
     <div>
       <h1 class="text-base font-bold text-brand-primary tracking-tight">⚡ AptoFlux</h1>
-      <p class="text-xs text-brand-muted">Physiological Intelligence Engine</p>
+      <p class="text-xs text-brand-muted">Adaptive Multisport Training</p>
     </div>
     <div class="flex items-center gap-3">
       <!-- Sport selector -->
@@ -511,7 +511,7 @@
             <p class="text-xs text-brand-muted mb-0.5">Energy</p>
             <p id="s-kcal" class="text-base font-bold text-brand-primary">—</p>
           </div>
-          <div class="bg-white border border-[#3D8B6E]/30 rounded-xl p-3 shadow-sm">
+          <div class="bg-white border border-[#FF5E3A]/30 rounded-xl p-3 shadow-sm">
             <p class="text-xs text-brand-accent mb-0.5">⚡ Max Power</p>
             <p id="s-maxpower" class="text-base font-bold text-brand-accent">—</p>
             <p id="s-maxpower-grad" class="text-xs text-brand-muted mt-0.5">—</p>
@@ -1106,20 +1106,20 @@ function renderChart(data) {
   // Elevation outline
   ctx.beginPath();
   data.forEach((r, i) => { i === 0 ? ctx.moveTo(toX(r.d), toYe(r.e)) : ctx.lineTo(toX(r.d), toYe(r.e)); });
-  ctx.strokeStyle = '#3D8B6E'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.strokeStyle = '#FF5E3A'; ctx.lineWidth = 1.5; ctx.stroke();
 
   if (baseFTP > 0) {
-    const zColor = { blue: '#3b82f6', green: '#3D8B6E', yellow: '#E8C547', red: '#ef4444' };
+    const zColor = { blue: '#3b82f6', green: '#FF5E3A', yellow: '#6D3DED', red: '#ef4444' };
     ctx.lineWidth = 2;
     for (let i = 0; i < data.length - 1; i++) {
       ctx.beginPath();
       ctx.moveTo(toX(data[i].d), toYw(data[i].w));
       ctx.lineTo(toX(data[i+1].d), toYw(data[i+1].w));
-      ctx.strokeStyle = zColor[data[i].z] || '#3D8B6E';
+      ctx.strokeStyle = zColor[data[i].z] || '#FF5E3A';
       ctx.stroke();
     }
     ctx.setLineDash([5, 4]);
-    ctx.strokeStyle = 'rgba(232,197,71,0.8)';
+    ctx.strokeStyle = 'rgba(0,229,255,0.8)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     data.forEach((r, i) => {
@@ -1130,23 +1130,23 @@ function renderChart(data) {
   } else {
     ctx.beginPath();
     data.forEach((r, i) => { i === 0 ? ctx.moveTo(toX(r.d), toYw(r.w)) : ctx.lineTo(toX(r.d), toYw(r.w)); });
-    ctx.strokeStyle = '#3D8B6E'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.strokeStyle = '#FF5E3A'; ctx.lineWidth = 1.5; ctx.stroke();
   }
 
   // X axis labels
-  ctx.fillStyle = '#7B8B8C'; ctx.font = '10px "DM Sans", system-ui'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#6B7585'; ctx.font = '10px "DM Sans", system-ui'; ctx.textAlign = 'center';
   for (let i = 0; i <= 6; i++) {
     const d = maxD * i / 6;
     ctx.fillText((d / 1000).toFixed(1) + ' km', toX(d), H - pB + 14);
   }
   // Left Y (elevation)
-  ctx.textAlign = 'right'; ctx.fillStyle = '#3D8B6E';
+  ctx.textAlign = 'right'; ctx.fillStyle = '#FF5E3A';
   for (let i = 0; i <= 4; i++) {
     const e = minE + eRng * i / 4;
     ctx.fillText(Math.round(e) + ' m', pL - 6, toYe(e) + 3.5);
   }
   // Right Y (watts)
-  ctx.textAlign = 'left'; ctx.fillStyle = '#7B8B8C';
+  ctx.textAlign = 'left'; ctx.fillStyle = '#6B7585';
   for (let i = 0; i <= 4; i++) {
     const w = maxW * i / 4;
     ctx.fillText(Math.round(w) + ' W', pL + cW + 6, toYw(w) + 3.5);
@@ -1160,14 +1160,14 @@ function renderChart(data) {
     legendEl.innerHTML =
       '<span class="flex items-center gap-1.5 text-xs text-brand-accent"><span class="inline-block w-3 h-3 rounded-sm" style="background:rgba(61,139,110,0.25)"></span>Elevation</span>' +
       '<span class="flex items-center gap-1.5 text-xs text-blue-500"><span class="inline-block w-4 h-0.5 bg-blue-500 rounded"></span>Z1 Recovery</span>' +
-      '<span class="flex items-center gap-1.5 text-xs text-brand-accent"><span class="inline-block w-4 h-0.5 rounded" style="background:#3D8B6E"></span>Z2 Tempo</span>' +
-      '<span class="flex items-center gap-1.5 text-xs text-yellow-600"><span class="inline-block w-4 h-0.5 rounded" style="background:#E8C547"></span>Z3 Threshold</span>' +
+      '<span class="flex items-center gap-1.5 text-xs text-brand-accent"><span class="inline-block w-4 h-0.5 rounded" style="background:#FF5E3A"></span>Z2 Tempo</span>' +
+      '<span class="flex items-center gap-1.5 text-xs" style="color:#6D3DED"><span class="inline-block w-4 h-0.5 rounded" style="background:#6D3DED"></span>Z3 Threshold</span>' +
       '<span class="flex items-center gap-1.5 text-xs text-red-500"><span class="inline-block w-4 h-0.5 bg-red-500 rounded"></span>Z4 Anaerobic</span>' +
-      '<span class="flex items-center gap-1.5 text-xs text-yellow-600/70"><span class="inline-block w-5 border-t border-dashed mt-px" style="border-color:#E8C547"></span>' + thresholdLabel + '</span>';
+      '<span class="flex items-center gap-1.5 text-xs" style="color:#00B8CC"><span class="inline-block w-5 border-t border-dashed mt-px" style="border-color:#00E5FF"></span>' + thresholdLabel + '</span>';
   } else {
     legendEl.innerHTML =
       '<span class="flex items-center gap-1.5 text-xs text-brand-accent"><span class="inline-block w-3 h-3 rounded-sm" style="background:rgba(61,139,110,0.25)"></span>Elevation</span>' +
-      '<span class="flex items-center gap-1.5 text-xs text-brand-accent"><span class="inline-block w-4 h-0.5 rounded" style="background:#3D8B6E"></span>Power</span>';
+      '<span class="flex items-center gap-1.5 text-xs text-brand-accent"><span class="inline-block w-4 h-0.5 rounded" style="background:#FF5E3A"></span>Power</span>';
   }
 }
 
@@ -1475,8 +1475,8 @@ function renderTSSChart(metrics, state) {
   const tssList = metrics.map(m => m.tss || 0);
   const maxTSS = Math.max(...tssList, 1) * 1.2;
   const n = metrics.length;
-  ctx.fillStyle = '#FAFAFA'; ctx.fillRect(0, 0, W, H);
-  ctx.strokeStyle = '#D8CCBE'; ctx.lineWidth = 1;
+  ctx.fillStyle = '#F4F5F9'; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#D1D5E8'; ctx.lineWidth = 1;
   for (let i = 0; i <= 4; i++) {
     const y = pT + cH * i / 4;
     ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(pL + cW, y); ctx.stroke();
@@ -1485,32 +1485,32 @@ function renderTSSChart(metrics, state) {
   const toY = v => pT + cH - (v / maxTSS) * cH;
   const barW = Math.max(2, cW / n - 1);
   tssList.forEach((v, i) => {
-    ctx.fillStyle = v > 100 ? '#E8C547' : v > 60 ? '#3D8B6E' : '#D8CCBE';
+    ctx.fillStyle = v > 100 ? '#00E5FF' : v > 60 ? '#FF5E3A' : '#D1D5E8';
     ctx.fillRect(toX(i) - barW/2, toY(v), barW, pT + cH - toY(v));
   });
   const k42 = 2/43; let ctl = tssList[0] || 0;
   const ctlLine = tssList.map(v => { ctl = v * k42 + ctl * (1-k42); return ctl; });
   ctx.beginPath();
   ctlLine.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
-  ctx.strokeStyle = '#3D8B6E'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.strokeStyle = '#FF5E3A'; ctx.lineWidth = 2; ctx.stroke();
   const k7 = 2/8; let atl = tssList[0] || 0;
   const atlLine = tssList.map(v => { atl = v * k7 + atl * (1-k7); return atl; });
   ctx.beginPath();
   atlLine.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
-  ctx.strokeStyle = '#E8C547'; ctx.lineWidth = 1.5; ctx.stroke();
-  ctx.fillStyle = '#7B8B8C'; ctx.font = '9px "DM Sans", system-ui'; ctx.textAlign = 'center';
+  ctx.strokeStyle = '#00E5FF'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle = '#6B7585'; ctx.font = '9px "DM Sans", system-ui'; ctx.textAlign = 'center';
   metrics.forEach((m, i) => {
     if (i === 0 || i === n-1 || i % 30 === 0)
       ctx.fillText(m.date.slice(5), toX(i), H - pB + 12);
   });
-  ctx.textAlign = 'right'; ctx.fillStyle = '#7B8B8C';
+  ctx.textAlign = 'right'; ctx.fillStyle = '#6B7585';
   for (let i = 0; i <= 4; i++) {
     const v = maxTSS * i / 4;
     ctx.fillText(Math.round(v), pL - 4, toY(v) + 3);
   }
   ctx.textAlign = 'left';
-  ctx.fillStyle = '#3D8B6E'; ctx.fillText('CTL', pL + 4, pT + 12);
-  ctx.fillStyle = '#E8C547'; ctx.fillText('ATL', pL + 30, pT + 12);
+  ctx.fillStyle = '#FF5E3A'; ctx.fillText('CTL', pL + 4, pT + 12);
+  ctx.fillStyle = '#00E5FF'; ctx.fillText('ATL', pL + 30, pT + 12);
 }
 </script>
 </body>
