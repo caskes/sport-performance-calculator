@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sport Performance Calculator</title>
+  <title>AptoFlux</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -55,7 +55,7 @@
 <header class="border-b border-brand-border bg-white sticky top-0 z-10 shadow-sm">
   <div class="max-w-7xl mx-auto px-5 py-3 flex items-center justify-between">
     <div>
-      <h1 class="text-base font-bold text-brand-primary tracking-tight">⚡ Sport Performance Calculator</h1>
+      <h1 class="text-base font-bold text-brand-primary tracking-tight">⚡ AptoFlux</h1>
       <p class="text-xs text-brand-muted">Physiological Intelligence Engine</p>
     </div>
     <div class="flex items-center gap-3">
@@ -1214,7 +1214,7 @@ function exportCSV() {
   });
   const a = Object.assign(document.createElement('a'), {
     href: URL.createObjectURL(new Blob([rows.join('\n')], { type: 'text/csv' })),
-    download: 'sport-performance.csv',
+    download: 'aptoflux.csv',
   });
   a.click();
 }
