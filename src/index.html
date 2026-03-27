@@ -646,10 +646,12 @@
       </div>
     </div>
     <h2 class="text-lg font-bold text-brand-primary font-display mb-1">Choose your goal event</h2>
-    <p class="text-xs text-brand-muted mb-5">Select the event you're training towards. Your fitness gap analysis will be tailored to this goal.</p>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+    <p class="text-xs text-brand-muted mb-5">Select an event to train towards or create your own. Your fitness gap analysis is tailored to your goal.</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+
+      <!-- Livigno Granfondo -->
       <div id="card-livigno" onclick="selectGoal('livigno')"
-        class="bg-white border-2 border-brand-border rounded-xl p-4 cursor-pointer hover:border-brand-accent transition-colors">
+        class="bg-white border-2 border-brand-border rounded-xl p-4 cursor-pointer hover:border-brand-accent transition-colors flex flex-col">
         <div class="flex items-start justify-between mb-3">
           <div>
             <span class="text-2xl">🚴</span>
@@ -657,10 +659,10 @@
           </div>
           <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Elite</span>
         </div>
-        <div class="flex flex-wrap gap-3 text-xs text-brand-muted mb-3">
-          <span>📏 130 km</span><span>⛰️ 3,200 m gain</span><span>⏱ 5h30 – 8h00</span>
+        <div class="flex flex-wrap gap-2 text-xs text-brand-muted mb-3">
+          <span>📏 166.5 km</span><span>⛰️ 4,940 m gain</span><span>⏱ 5h30 – 8h00</span>
         </div>
-        <div class="space-y-2 border-t border-brand-border pt-3" onclick="event.stopPropagation()">
+        <div class="space-y-2 border-t border-brand-border pt-3 mt-auto" onclick="event.stopPropagation()">
           <div>
             <label class="text-xs text-brand-muted block mb-1">Target finish time (e.g. 6:30)</label>
             <input id="target-livigno" type="text" placeholder="hh:mm" maxlength="5"
@@ -671,10 +673,16 @@
             <input id="date-livigno" type="date"
               class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
           </div>
+          <button onclick="event.stopPropagation(); openPresetRoute('livigno')"
+            class="w-full mt-1 border border-brand-accent text-brand-accent hover:bg-brand-accent hover:text-white text-xs font-semibold py-1.5 rounded-lg transition-colors">
+            📈 Analyze Route
+          </button>
         </div>
       </div>
+
+      <!-- NYC Marathon -->
       <div id="card-nyc-marathon" onclick="selectGoal('nyc-marathon')"
-        class="bg-white border-2 border-brand-border rounded-xl p-4 cursor-pointer hover:border-brand-accent transition-colors">
+        class="bg-white border-2 border-brand-border rounded-xl p-4 cursor-pointer hover:border-brand-accent transition-colors flex flex-col">
         <div class="flex items-start justify-between mb-3">
           <div>
             <span class="text-2xl">🏃</span>
@@ -682,10 +690,10 @@
           </div>
           <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">Hard</span>
         </div>
-        <div class="flex flex-wrap gap-3 text-xs text-brand-muted mb-3">
-          <span>📏 42.2 km</span><span>⛰️ ~300 m gain</span><span>⏱ 3h30 – 6h00</span>
+        <div class="flex flex-wrap gap-2 text-xs text-brand-muted mb-3">
+          <span>📏 42.3 km</span><span>⛰️ 271 m gain</span><span>⏱ 3h30 – 6h00</span>
         </div>
-        <div class="space-y-2 border-t border-brand-border pt-3" onclick="event.stopPropagation()">
+        <div class="space-y-2 border-t border-brand-border pt-3 mt-auto" onclick="event.stopPropagation()">
           <div>
             <label class="text-xs text-brand-muted block mb-1">Target finish time (e.g. 4:30)</label>
             <input id="target-nyc-marathon" type="text" placeholder="hh:mm" maxlength="5"
@@ -696,8 +704,58 @@
             <input id="date-nyc-marathon" type="date"
               class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
           </div>
+          <button onclick="event.stopPropagation(); openPresetRoute('nyc-marathon')"
+            class="w-full mt-1 border border-brand-accent text-brand-accent hover:bg-brand-accent hover:text-white text-xs font-semibold py-1.5 rounded-lg transition-colors">
+            📈 Analyze Route
+          </button>
         </div>
       </div>
+
+      <!-- Custom Event -->
+      <div id="card-custom" onclick="selectGoal('custom')"
+        class="bg-white border-2 border-brand-border rounded-xl p-4 cursor-pointer hover:border-brand-accent transition-colors flex flex-col">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <span class="text-2xl">✏️</span>
+            <h3 class="text-sm font-bold text-brand-primary font-display mt-1">Create Custom Event</h3>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-surface text-brand-muted">Custom</span>
+        </div>
+        <p class="text-xs text-brand-muted mb-3">Add your own event with a GPX file for a personalized gap analysis.</p>
+        <div id="custom-event-form" class="hidden space-y-2 border-t border-brand-border pt-3 mt-auto" onclick="event.stopPropagation()">
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Event name</label>
+            <input id="custom-name" type="text" placeholder="e.g. Tour de Suisse"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+          <div class="flex gap-2">
+            <button id="custom-btn-cycling" onclick="setCustomSport('cycling')"
+              class="flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all bg-brand-accent text-white">🚴 Cycling</button>
+            <button id="custom-btn-running" onclick="setCustomSport('running')"
+              class="flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all bg-brand-surface text-brand-muted">🏃 Running</button>
+          </div>
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Target finish time</label>
+            <input id="custom-target" type="text" placeholder="hh:mm" maxlength="5"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">Event date (optional)</label>
+            <input id="custom-date" type="date"
+              class="w-full bg-brand-surface border border-brand-border rounded px-2 py-1.5 text-xs text-brand-primary focus:outline-none focus:border-brand-accent">
+          </div>
+          <div>
+            <label class="text-xs text-brand-muted block mb-1">GPX file (optional)</label>
+            <input id="custom-gpx" type="file" accept=".gpx,.kml" onchange="previewCustomGpx(this)"
+              class="w-full text-xs text-brand-muted file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-brand-surface file:text-brand-primary cursor-pointer">
+            <p id="custom-gpx-preview" class="hidden mt-1 text-xs text-brand-accent font-medium"></p>
+          </div>
+        </div>
+        <div id="custom-event-prompt" class="mt-auto pt-3 border-t border-brand-border text-center">
+          <span class="text-xs text-brand-muted">Click to set up your event →</span>
+        </div>
+      </div>
+
     </div>
     <button id="goal-continue-btn" disabled onclick="goToIntake()"
       class="w-full bg-brand-accent hover:bg-brand-hover disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold py-3 rounded-xl transition-colors">
@@ -1782,22 +1840,41 @@ function renderTSSChart(metrics, state) {
 // PRESET EVENTS
 // ════════════════════════════════════════════════════════════════
 const PRESET_EVENTS = {
-  livigno: { id:'livigno', name:'Livigno Cycling Granfondo', sport:'cycling', icon:'🚴', distance_km:130, elevation_m:3200, duration_range:{min:330,max:480}, difficulty:'Elite' },
-  'nyc-marathon': { id:'nyc-marathon', name:'New York City Marathon', sport:'running', icon:'🏃', distance_km:42.195, elevation_m:300, duration_range:{min:210,max:360}, difficulty:'Hard' },
+  livigno: { id:'livigno', name:'Livigno Cycling Granfondo', sport:'cycling', icon:'🚴', distance_km:166.5, elevation_m:4940, duration_range:{min:330,max:480}, difficulty:'Elite' },
+  'nyc-marathon': { id:'nyc-marathon', name:'New York City Marathon', sport:'running', icon:'🏃', distance_km:42.3, elevation_m:271, duration_range:{min:210,max:360}, difficulty:'Hard' },
 };
+
+// Custom event data set by previewCustomGpx
+let customEventData = null; // { name, sport, distance_km, elevation_m, target_finish_min, event_date }
 
 // ════════════════════════════════════════════════════════════════
 // GOAL SELECTION
 // ════════════════════════════════════════════════════════════════
 function selectGoal(eventId) {
   selectedGoal = { event_id: eventId };
-  Object.keys(PRESET_EVENTS).forEach(id => {
+  const allIds = [...Object.keys(PRESET_EVENTS), 'custom'];
+  allIds.forEach(id => {
     const card = document.getElementById('card-' + id);
     if (!card) return;
     card.classList.toggle('border-brand-accent', id === eventId);
     card.classList.toggle('bg-orange-50', id === eventId);
     card.classList.toggle('border-brand-border', id !== eventId);
   });
+
+  // Show/hide custom event form
+  const form   = document.getElementById('custom-event-form');
+  const prompt = document.getElementById('custom-event-prompt');
+  if (eventId === 'custom') {
+    form?.classList.remove('hidden');
+    prompt?.classList.add('hidden');
+    // Don't enable continue yet — user must fill in details
+    document.getElementById('goal-continue-btn').disabled = true;
+    return;
+  } else {
+    form?.classList.add('hidden');
+    prompt?.classList.remove('hidden');
+  }
+
   document.getElementById('goal-continue-btn').disabled = false;
   setSport(PRESET_EVENTS[eventId].sport);
   localStorage.setItem('aptoflux-goal', JSON.stringify(selectedGoal));
@@ -1812,6 +1889,27 @@ function parseTargetTime(str) {
 
 function goToIntake() {
   if (!selectedGoal) return;
+
+  if (selectedGoal.event_id === 'custom') {
+    const name   = document.getElementById('custom-name')?.value?.trim();
+    const target = parseTargetTime(document.getElementById('custom-target')?.value);
+    const date   = document.getElementById('custom-date')?.value || null;
+    if (!name) { alert('Please enter an event name.'); return; }
+    customEventData = {
+      name,
+      sport: customEventData?.sport ?? 'cycling',
+      distance_km: customEventData?.distance_km ?? null,
+      elevation_m: customEventData?.elevation_m ?? null,
+      target_finish_min: target ?? 360,
+      event_date: date,
+    };
+    selectedGoal = { event_id: 'custom', target_finish_min: customEventData.target_finish_min, event_date: date };
+    localStorage.setItem('aptoflux-goal', JSON.stringify({ ...selectedGoal, _custom: customEventData }));
+    setSport(customEventData.sport);
+    setView('intake');
+    return;
+  }
+
   const ev = PRESET_EVENTS[selectedGoal.event_id];
   const targetVal = document.getElementById('target-' + selectedGoal.event_id)?.value;
   const dateVal   = document.getElementById('date-'   + selectedGoal.event_id)?.value;
@@ -1829,11 +1927,12 @@ function goToIntake() {
 // ════════════════════════════════════════════════════════════════
 function renderIntakeGoalSummary() {
   if (!selectedGoal) return;
-  const ev = PRESET_EVENTS[selectedGoal.event_id];
+  const isCustom = selectedGoal.event_id === 'custom';
+  const ev = isCustom ? customEventData : PRESET_EVENTS[selectedGoal.event_id];
   if (!ev) return;
-  document.getElementById('intake-goal-icon').textContent = ev.icon;
+  document.getElementById('intake-goal-icon').textContent = isCustom ? '✏️' : ev.icon;
   document.getElementById('intake-goal-name').textContent = ev.name;
-  const tMin  = selectedGoal.target_finish_min ?? ev.duration_range.max;
+  const tMin  = selectedGoal.target_finish_min ?? (ev.duration_range?.max ?? 360);
   const weeks = selectedGoal.event_date
     ? Math.max(0, Math.round((new Date(selectedGoal.event_date).getTime() - Date.now()) / (7 * 86400000)))
     : 16;
@@ -1936,22 +2035,27 @@ function estimateVO2maxCycling(dist_km, time_min) {
 }
 
 function computeGapAnalysis(intake, goal) {
-  const ev      = PRESET_EVENTS[goal.event_id];
-  const tMin    = goal.target_finish_min ?? ev.duration_range.max;
-  const weeks   = goal.event_date
+  const isCustom = goal.event_id === 'custom';
+  const ev = isCustom ? customEventData : PRESET_EVENTS[goal.event_id];
+  const tMin  = goal.target_finish_min ?? (ev?.duration_range?.max ?? 360);
+  const weeks = goal.event_date
     ? Math.max(0, Math.round((new Date(goal.event_date).getTime() - Date.now()) / (7 * 86400000)))
     : 16;
 
+  const evSport = ev?.sport ?? 'cycling';
+  const evDist  = ev?.distance_km ?? (tMin / 60 * 25); // fallback: assume ~25 km/h cycling pace
+  const evElev  = ev?.elevation_m ?? 0;
+
   const curVO2  = intake.recent_vo2max_estimate
-    ?? (ev.sport === 'running'
+    ?? (evSport === 'running'
         ? estimateVO2maxRunning(intake.effort_distance_km, intake.effort_time_min)
         : estimateVO2maxCycling(intake.effort_distance_km, intake.effort_time_min));
 
-  const spd    = ev.distance_km / (tMin / 60);
-  const elev   = ev.sport === 'cycling' ? 1 + ev.elevation_m / 10000 : 1;
-  const reqVO2 = ev.sport === 'running'
-    ? estimateVO2maxRunning(ev.distance_km, tMin)
-    : Math.max(20, Math.min(85, Math.round(spd * elev * 1.8 + 3)));
+  const spd    = evDist / (tMin / 60);
+  const elevF  = evSport === 'cycling' ? 1 + evElev / 10000 : 1;
+  const reqVO2 = evSport === 'running'
+    ? estimateVO2maxRunning(evDist, tMin)
+    : Math.max(20, Math.min(85, Math.round(spd * elevF * 1.8 + 3)));
 
   const reqWeekly  = Math.round(tMin / 60 * 2.5 * 10) / 10;
   const reqLongest = Math.round(tMin / 60 * 0.75 * 10) / 10;
@@ -1986,12 +2090,13 @@ async function renderGapAnalysis() {
   }
   if (!selectedGoal) { setView('goal'); return; }
 
-  const ev  = PRESET_EVENTS[selectedGoal.event_id];
+  const isCustom = selectedGoal.event_id === 'custom';
+  const ev  = isCustom ? customEventData : PRESET_EVENTS[selectedGoal.event_id];
   const gap = computeGapAnalysis(fitnessIntake, selectedGoal);
-  const tMin = selectedGoal.target_finish_min ?? ev.duration_range.max;
+  const tMin = selectedGoal.target_finish_min ?? (ev?.duration_range?.max ?? 360);
 
-  document.getElementById('gap-event-icon').textContent = ev.icon;
-  document.getElementById('gap-event-name').textContent = ev.name;
+  document.getElementById('gap-event-icon').textContent = isCustom ? '✏️' : (ev?.icon ?? '🏅');
+  document.getElementById('gap-event-name').textContent = ev?.name ?? 'Custom Event';
   document.getElementById('gap-event-meta').textContent =
     'Target: ' + Math.floor(tMin / 60) + 'h' + String(tMin % 60).padStart(2, '0') + ' · ' + gap.weeks_to_event + ' weeks away';
 
@@ -2027,17 +2132,104 @@ async function renderGapAnalysis() {
 
 async function buildPlan() {
   if (!selectedGoal) { setView('training'); return; }
-  const ev   = PRESET_EVENTS[selectedGoal.event_id];
+  const isCustom = selectedGoal.event_id === 'custom';
+  const ev = isCustom ? customEventData : PRESET_EVENTS[selectedGoal.event_id];
   const date = selectedGoal.event_date
     || new Date(Date.now() + 16 * 7 * 86400000).toISOString().slice(0, 10);
   try {
     await fetch('/api/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: Date.now().toString(), name: ev.name, date, sport: ev.sport, distance_km: ev.distance_km }),
+      body: JSON.stringify({
+        id: Date.now().toString(),
+        name: ev?.name ?? 'Custom Event',
+        date,
+        sport: ev?.sport ?? 'cycling',
+        distance_km: ev?.distance_km ?? null,
+      }),
     });
   } catch {}
   setView('training');
+}
+
+// ════════════════════════════════════════════════════════════════
+// PRESET ROUTE ANALYZER
+// ════════════════════════════════════════════════════════════════
+async function openPresetRoute(presetId) {
+  const ev = PRESET_EVENTS[presetId];
+  if (!ev) return;
+  setView('race');
+  if (ev.sport !== sport) {
+    rawIntervals = null;
+    setSport(ev.sport);
+  }
+  selectedFile = { name: ev.name };
+  const disp = document.getElementById('filename-display');
+  disp.textContent = 'Loading route for ' + ev.name + '…';
+  disp.classList.remove('hidden');
+  document.getElementById('process-btn').disabled = true;
+
+  const res = await fetch('/api/presets/' + presetId + '/gpx');
+  if (!res.ok) {
+    disp.textContent = 'Route data not found.';
+    return;
+  }
+  const json = await res.json();
+  rawIntervals = json.intervals;
+  computed = null;
+  totalDistM = 0; totalHours = 0; baseWMax = 0; baseFTP = 0; redDistFraction = 0;
+  disp.textContent = '✓ ' + ev.name + ' (preset route)';
+  const srcLabel = document.getElementById('event-source-label');
+  if (srcLabel) { srcLabel.textContent = 'Route: ' + ev.name; srcLabel.classList.remove('hidden'); }
+  document.getElementById('process-btn').disabled = false;
+  recalculate();
+}
+
+// ════════════════════════════════════════════════════════════════
+// CUSTOM EVENT HELPERS
+// ════════════════════════════════════════════════════════════════
+function setCustomSport(s) {
+  if (!customEventData) customEventData = {};
+  customEventData.sport = s;
+  const active = 'flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all bg-brand-accent text-white';
+  const idle   = 'flex-1 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all bg-brand-surface text-brand-muted';
+  const btnC = document.getElementById('custom-btn-cycling');
+  const btnR = document.getElementById('custom-btn-running');
+  if (btnC) btnC.className = s === 'cycling' ? active : idle;
+  if (btnR) btnR.className = s === 'running' ? active : idle;
+}
+
+async function previewCustomGpx(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  const preview = document.getElementById('custom-gpx-preview');
+  preview.textContent = 'Parsing…';
+  preview.classList.remove('hidden');
+
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const res = await fetch('/api/parse', { method: 'POST', body: fd });
+    if (!res.ok) throw new Error('Parse failed');
+    const data = await res.json();
+    const intervals = data.intervals ?? [];
+    const eles = intervals.map(i => i.e);
+    const gain = eles.reduce((s, e, i) => s + (i > 0 && e > eles[i - 1] ? e - eles[i - 1] : 0), 0);
+    const distKm = (intervals.at(-1)?.d ?? 0) / 1000;
+
+    if (!customEventData) customEventData = {};
+    customEventData.distance_km = Math.round(distKm * 10) / 10;
+    customEventData.elevation_m = Math.round(gain);
+
+    preview.textContent = '✓ ' + distKm.toFixed(1) + ' km · ' + Math.round(gain) + ' m gain';
+    document.getElementById('goal-continue-btn').disabled = false;
+
+    // Also load the route into Race Analyzer in the background
+    rawIntervals = intervals;
+    computed = null;
+  } catch (e) {
+    preview.textContent = 'Failed to parse GPX file.';
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -2045,7 +2237,13 @@ async function buildPlan() {
 // ════════════════════════════════════════════════════════════════
 async function initApp() {
   setSport('cycling');
-  try { selectedGoal = JSON.parse(localStorage.getItem('aptoflux-goal') || 'null'); } catch {}
+  try {
+    const saved = JSON.parse(localStorage.getItem('aptoflux-goal') || 'null');
+    if (saved) {
+      selectedGoal = saved;
+      if (saved._custom) { customEventData = saved._custom; delete selectedGoal._custom; }
+    }
+  } catch {}
   try {
     const res = await fetch('/api/fitness-intake');
     if (res.ok) {

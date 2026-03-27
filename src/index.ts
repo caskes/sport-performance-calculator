@@ -9,6 +9,8 @@ import {
   eventAdvisory,
 } from './lib/training-brain';
 import { FitnessIntake, GoalSelection } from './lib/gap-analysis';
+import livignoIntervals from './assets/livigno-intervals.json';
+import nycMarathonIntervals from './assets/nyc-marathon-intervals.json';
 import appHtml from './index.html';
 
 export interface Env {
@@ -166,6 +168,20 @@ app.get('/api/events/:id/gpx', async (c) => {
   const raw = await c.env.ATHLETE_KV.get(`event-gpx:${id}`);
   if (!raw) return c.json({ error: 'No GPX data for this event' }, 404);
   return c.json({ intervals: JSON.parse(raw) });
+});
+
+// ─── API: preset event GPX intervals ──────────────────────────────────────────
+
+const PRESET_INTERVALS: Record<string, unknown[]> = {
+  livigno: livignoIntervals,
+  'nyc-marathon': nycMarathonIntervals,
+};
+
+app.get('/api/presets/:id/gpx', (c) => {
+  const id = c.req.param('id');
+  const intervals = PRESET_INTERVALS[id];
+  if (!intervals) return c.json({ error: 'Preset not found' }, 404);
+  return c.json({ intervals });
 });
 
 // ─── API: fitness intake from manual form or Apple Shortcut ───────────────────
