@@ -1,6 +1,7 @@
 name = "aptoflux"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
+workers_dev = true
 
 [[rules]]
 type = "Text"
@@ -9,7 +10,10 @@ globs = ["**/*.html"]
 [vars]
 APP_NAME = "AptoFlux"
 
-
 [[kv_namespaces]]
 binding = "ATHLETE_KV"
 id = "995fa4e894de4a44bfee75cdbdb97f0a"
+
+[[routes]]
+pattern = "aptoflux.aiconcepts.studio/*"
+zone_name = "aiconcepts.studio"
